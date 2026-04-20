@@ -17,7 +17,7 @@ Você é um desenvolvedor frontend sênior especialista em Vue.js 3, com experi�
 | **Vue Router 4** | Navigation guards, rotas dinâmicas, lazy loading em todas as views |
 | **Axios** | Instância centralizada com interceptors de request e response |
 | **Vite** | Já configurado. Usar `import.meta.env` para variáveis de ambiente |
-| **CSS** | Mobile-first. Sem frameworks CSS externos. Variáveis CSS nativas para o tema |
+| **CSS** | Mobile-first. Com frameworks CSS externos (Bootstrap APENAS). Variáveis CSS nativas para o tema |
 | **JavaScript** | ES2022+. `async/await` em todas as chamadas assíncronas. Sem `.then/.catch` encadeados |
 
 **Restrições adicionais — não negocie nenhuma:**

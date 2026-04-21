@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
-// Definimos as rotas como um array de objetos
 const routes = [
     {
         path: '/login',
@@ -16,31 +16,27 @@ const routes = [
     },
     {
         path: '/',
-        redirect: '/feed',
-        component: () => import('../layouts/MainLayout.vue'),
-        children: [
-            {
-                path: 'feed',
-                name: 'Feed',
-                component: () => import('../views/FeedView.vue'),
-                meta: { requiresAuth: true }
-            },
-            {
-                path: 'explore',
-                name: 'Explore',
-                component: () => import('../views/ExploreView.vue'),
-                meta: { requiresAuth: true }
-            },
-            // Rota dinâmica para o perfil
-            {
-                path: 'profile/:username',
-                name: 'Profile',
-                component: () => import('../views/ProfileView.vue'),
-                meta: { requiresAuth: true }
-            }
-        ]
+        redirect: '/feed'
     },
-    // Rota 404 - Caso o usuário digite algo que não existe
+    {
+        path: '/feed',
+        name: 'Feed',
+        component: () => import('../views/FeedView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/create',
+        name: 'CreatePost',
+        component: () => import('../views/CreatePostView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/profile/:username',
+        name: 'Profile',
+        component: () => import('../views/ProfileView.vue'),
+        meta: { requiresAuth: true }
+    },
+    // Rota catch-all (404)
     {
         path: '/:pathMatch(.*)*',
         redirect: '/feed'
@@ -52,22 +48,16 @@ const router = createRouter({
     routes
 });
 
-/**
- * Navigation Guard:
- * Antes de cada troca de rota, verificamos se o usuário tem permissão.
- */
+// Navigation Guard
 router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('token');
-    const isAuthRequired = to.matched.some(record => record.meta.requiresAuth);
+    const authStore = useAuthStore();
+    const isAuthenticated = authStore.isAuthenticated;
 
-    if (isAuthRequired && !token) {
-        // Tenta acessar página protegida sem token -> vai pro Login
+    if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login');
-    } else if (!isAuthRequired && token) {
-        // Tenta acessar Login/Register já estando logado -> vai pro Feed
+    } else if (!to.meta.requiresAuth && isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
         next('/feed');
     } else {
-        // Segue viagem normalmente
         next();
     }
 });

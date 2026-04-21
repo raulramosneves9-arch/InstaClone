@@ -1,38 +1,28 @@
 import axios from 'axios';
 
-// Criamos a instância usando a variável de ambiente definida no módulo anterior
+/**
+ * Esta instância está pronta para quando a API real for conectada.
+ * Atualmente o projeto opera local-first, mas as chamadas via Axios
+ * devem seguir este padrão para facilitar a migração.
+ */
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
 });
 
-/**
- * Interceptor de Request:
- * Antes de cada chamada, verificamos se existe um token no localStorage.
- * Se houver, injetamos no Header Authorization.
- */
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+// Interceptor para injetar Token JWT
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
-);
+    return config;
+});
 
-/**
- * Interceptor de Response:
- * Monitoramos as respostas do servidor. Se recebermos um 401 (Não autorizado),
- * limpamos os dados locais e redirecionamos para o login.
- */
+// Interceptor para tratar expiração de sessão (401)
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
-            // Usamos window.location para garantir um "hard reset" no estado da aplicação
+        if (error.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login';

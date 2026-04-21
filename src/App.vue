@@ -1,19 +1,16 @@
 <script setup>
-
 import { onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 import { useFeedStore } from './stores/feed';
 
-const auth = useAuthStore();
-const feed = useFeedStore();
+const authStore = useAuthStore();
+const feedStore = useFeedStore();
 
 onMounted(() => {
-  auth.init();
-  feed.init();
-  console.log('Usuários:', auth.localAccounts);
-  console.log('Posts:', feed.posts);
+  // Inicializa as stores com os dados do LocalStorage ou Mocks
+  authStore.init();
+  feedStore.init();
 });
-
 </script>
 
 <template>
@@ -25,7 +22,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* Transição suave de opacidade entre páginas */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;

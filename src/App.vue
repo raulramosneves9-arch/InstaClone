@@ -1,5 +1,19 @@
 <script setup>
-// Não precisamos de lógica aqui por enquanto
+
+import { onMounted } from 'vue';
+import { useAuthStore } from './stores/auth';
+import { useFeedStore } from './stores/feed';
+
+const auth = useAuthStore();
+const feed = useFeedStore();
+
+onMounted(() => {
+  auth.init();
+  feed.init();
+  console.log('Usuários:', auth.localAccounts);
+  console.log('Posts:', feed.posts);
+});
+
 </script>
 
 <template>

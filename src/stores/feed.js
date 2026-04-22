@@ -1,86 +1,66 @@
 import { defineStore } from 'pinia';
-import { MOCK_POSTS } from '../data/mockData';
+import api from '../services/api';
 
 export const useFeedStore = defineStore('feed', {
     state: () => ({
-        posts: []
+        postsById: {},      // Dicionário para acesso rápido
+        feedOrder: [],      // IDs ordenados
+        nextCursor: null,
+        isLoading: false
     }),
 
+    getters: {
+        feedPosts: (state) => state.feedOrder.map(id => state.postsById[id])
+    },
+
     actions: {
-        init() {
-            const savedPosts = localStorage.getItem('local_posts');
-            // Semeia com MOCK_POSTS se o localStorage estiver vazio
-            this.posts = savedPosts ? JSON.parse(savedPosts) : MOCK_POSTS;
+        async fetchFeed() {
+            this.isLoading = true;
+            try {
+                // Endpoint: GET /api/feed
+                const { data } = await api.get('/feed');
 
-            if (!savedPosts) {
-                this.persistPosts();
+                // Normalização dos dados
+                data.data.forEach(post => {
+                    this.postsById[post.id] = post;
+                });
+
+                this.feedOrder = data.data.map(post => post.id);
+                this.nextCursor = data.next_cursor;
+            } finally {
+                this.isLoading = false;
             }
         },
 
-        persistPosts() {
-            localStorage.setItem('local_posts', JSON.stringify(this.posts));
-        },
-
-        getPaginatedFeed(page, perPage = 5) {
-            // Ordena por data (mais recentes primeiro)
-            const sorted = [...this.posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            const start = (page - 1) * perPage;
-            const end = start + perPage;
-
-            return {
-                data: sorted.slice(start, end),
-                hasMore: end < sorted.length
-            };
-        },
-
-        toggleLike(postId, userId) {
-            const post = this.posts.find(p => p.id === postId);
+        async toggleLike(postId) {
+            const post = this.postsById[postId];
             if (!post) return;
 
-            const index = post.likedBy.indexOf(userId);
-            if (index === -1) {
-                post.likedBy.push(userId);
-                post.likesCount++;
-            } else {
-                post.likedBy.splice(index, 1);
-                post.likesCount--;
+            // Atualização Otimista: muda na tela antes de ir pro banco
+            const originalState = { ...post };
+            post.isLiked = !post.isLiked;
+            post.likesCount += post.isLiked ? 1 : -1;
+
+            try {
+                if (post.isLiked) {
+                    await api.post(`/posts/${postId}/like`); //
+                } else {
+                    await api.delete(`/posts/${postId}/unlike`); //
+                }
+            } catch (error) {
+                // Reverte se a API falhar
+                this.postsById[postId] = originalState;
             }
-            this.persistPosts();
         },
 
-        addComment(postId, text, user) {
-            const post = this.posts.find(p => p.id === postId);
-            if (!post) return;
+        async createPost(formData) {
+            // Recebe FormData para suportar upload de arquivos reais
+            const { data } = await api.post('/posts', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
 
-            const newComment = {
-                id: Date.now(),
-                userId: user.id,
-                username: user.username,
-                text,
-                createdAt: new Date().toISOString()
-            };
-
-            post.comments.push(newComment);
-            this.persistPosts();
-        },
-
-        createPost(user, imageBase64, caption, location) {
-            const newPost = {
-                id: Date.now(),
-                authorId: user.id,
-                username: user.username,
-                userAvatar: user.avatar,
-                imageUrl: imageBase64,
-                caption,
-                location,
-                likesCount: 0,
-                likedBy: [],
-                createdAt: new Date().toISOString(),
-                comments: []
-            };
-
-            this.posts.unshift(newPost);
-            this.persistPosts();
+            this.postsById[data.id] = data;
+            this.feedOrder.unshift(data.id); // Novo post no topo
         }
     }
 });

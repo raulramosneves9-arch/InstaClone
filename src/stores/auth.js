@@ -1,87 +1,71 @@
 import { defineStore } from 'pinia';
-import { MOCK_USERS } from '../data/mockData';
+import api from '../services/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
-        token: null,
-        localAccounts: [] // Lista de usuários cadastrados no navegador
+        token: localStorage.getItem('instaclone.token') || null,
     }),
 
     getters: {
         isAuthenticated: (state) => !!state.token,
-        currentUserId: (state) => state.user?.id
     },
 
     actions: {
-        /**
-         * Inicializa a store buscando dados no localStorage.
-         * Se estiver vazio, carrega os MOCK_USERS como base inicial.
-         */
-        init() {
-            const savedUser = localStorage.getItem('user');
-            const savedToken = localStorage.getItem('token');
-            const savedAccounts = localStorage.getItem('local_accounts');
-
-            if (savedUser) this.user = JSON.parse(savedUser);
-            if (savedToken) this.token = savedToken;
-
-            // Se não houver contas salvas, semeia com os MOCK_USERS
-            this.localAccounts = savedAccounts ? JSON.parse(savedAccounts) : MOCK_USERS;
-
-            if (!savedAccounts) {
-                localStorage.setItem('local_accounts', JSON.stringify(MOCK_USERS));
+        async init() {
+            if (this.token) {
+                try {
+                    await this.fetchMe();
+                } catch (error) {
+                    this.logout();
+                }
             }
         },
 
-        async login(username, password) {
-            // Simula delay de rede
-            await new Promise(resolve => setTimeout(resolve, 800));
+        async login(email, password) {
+            try {
+                // Endpoint: POST /api/auth/login
+                const { data } = await api.post('/auth/login', { email, password });
 
-            const account = this.localAccounts.find(
-                u => u.username === username && u.password === password
-            );
+                this.token = data.access_token;
+                this.user = data.user;
 
-            if (account) {
-                const mockToken = `mock-token-${Date.now()}`;
-                this.user = account;
-                this.token = mockToken;
-
-                localStorage.setItem('user', JSON.stringify(account));
-                localStorage.setItem('token', mockToken);
-                return account;
+                localStorage.setItem('instaclone.token', this.token);
+                api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+            } catch (error) {
+                throw error.response?.data?.message || 'Erro ao fazer login';
             }
-            throw new Error('Usuário ou senha incorretos');
         },
 
-        register(name, username, email, password) {
-            const exists = this.localAccounts.some(u => u.username === username);
-            if (exists) throw new Error('Este nome de usuário já está em uso');
+        async register(userData) {
+            try {
+                // Endpoint: POST /api/auth/register
+                const { data } = await api.post('/auth/register', userData);
 
-            const newUser = {
-                id: Date.now(),
-                name,
-                username,
-                email,
-                password,
-                avatar: '',
-                bio: '',
-                followersCount: 0,
-                followingCount: 0
-            };
+                this.token = data.access_token;
+                this.user = data.user;
 
-            this.localAccounts.push(newUser);
-            localStorage.setItem('local_accounts', JSON.stringify(this.localAccounts));
+                localStorage.setItem('instaclone.token', this.token);
+            } catch (error) {
+                throw error.response?.data?.errors || 'Erro no cadastro';
+            }
+        },
 
-            // Login automático após registro
-            return this.login(username, password);
+        async fetchMe() {
+            const { data } = await api.get('/auth/me'); //
+            this.user = data;
         },
 
         logout() {
+            // Opcional: api.post('/auth/logout')
             this.user = null;
             this.token = null;
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            localStorage.removeItem('instaclone.token');
+            delete api.defaults.headers.common['Authorization'];
+        },
+
+        updateProfile(updatedUser) {
+            this.user = { ...this.user, ...updatedUser };
         }
-    }
+    },
 });

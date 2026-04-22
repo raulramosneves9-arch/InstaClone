@@ -2,26 +2,26 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import BaseButton from '../components/ui/BaseButton.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-const username = ref('');
+const email = ref('');
 const password = ref('');
 const error = ref('');
 const isLoading = ref(false);
 
 async function handleLogin() {
-    if (!username.value || !password.value) return;
-
     isLoading.value = true;
     error.value = '';
 
     try {
-        await authStore.login(username.value, password.value);
-        router.replace('/feed');
+        // Note: O backend Laravel geralmente usa 'email' em vez de 'username' para login
+        await authStore.login(email.value, password.value);
+        router.replace('/');
     } catch (err) {
-        error.value = err.message;
+        error.value = err; // Mensagem vinda do interceptor da API
     } finally {
         isLoading.value = false;
     }
@@ -29,121 +29,35 @@ async function handleLogin() {
 </script>
 
 <template>
-    <div class="auth-page">
-        <div class="auth-card">
-            <h1 class="insta-logo">InstaClone</h1>
+    <div class="card p-4 shadow-sm border">
+        <h1 class="text-center logo mb-4" style="font-family: 'Style Script', cursive; font-size: 3rem;">
+            InstaClone
+        </h1>
 
-            <form @submit.prevent="handleLogin" class="auth-form">
-                <input v-model="username" type="text" placeholder="Nome de usuário" required :disabled="isLoading" />
-                <input v-model="password" type="password" placeholder="Senha" required :disabled="isLoading" />
-
-                <button type="submit" class="btn-primary" :disabled="isLoading">
-                    <span v-if="!isLoading">Entrar</span>
-                    <span v-else>Entrando...</span>
-                </button>
-
-                <p v-if="error" class="error-msg">{{ error }}</p>
-            </form>
-
-            <div class="divider">
-                <span>OU</span>
+        <form @submit.prevent="handleLogin">
+            <div class="mb-3">
+                <input v-model="email" type="email" class="form-control" placeholder="E-mail" required
+                    :disabled="isLoading" />
+            </div>
+            <div class="mb-3">
+                <input v-model="password" type="password" class="form-control" placeholder="Senha" required
+                    :disabled="isLoading" />
             </div>
 
-            <p class="footer-text">
+            <BaseButton type="submit" :loading="isLoading">
+                Entrar
+            </BaseButton>
+
+            <div v-if="error" class="alert alert-danger mt-3 py-2 small text-center" role="alert">
+                {{ error }}
+            </div>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+            <p class="mb-0">
                 Não tem uma conta?
-                <router-link to="/register"><strong>Cadastre-se</strong></router-link>
+                <router-link to="/register" class="text-primary fw-bold text-decoration-none">Cadastre-se</router-link>
             </p>
         </div>
     </div>
 </template>
-
-<style scoped>
-.auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: var(--color-bg);
-    padding: 20px;
-}
-
-.auth-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    padding: 40px;
-    width: 100%;
-    max-width: 350px;
-    text-align: center;
-}
-
-.insta-logo {
-    font-family: 'Style Script', cursive, sans-serif;
-    font-size: 3rem;
-    margin-bottom: 30px;
-    background: linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end));
-    -webkit-background-clip: text;
-    /* Para navegadores baseados em Webkit */
-    background-clip: text;
-    /* Propriedade padrão para compatibilidade */
-    -webkit-text-fill-color: transparent;
-}
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-input {
-    padding: 10px;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-}
-
-.btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.btn-primary:disabled {
-    opacity: 0.7;
-}
-
-.error-msg {
-    color: var(--color-danger);
-    font-size: 14px;
-    margin-top: 15px;
-}
-
-.divider {
-    margin: 20px 0;
-    border-top: 1px solid var(--color-border);
-    position: relative;
-}
-
-.divider span {
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--color-surface);
-    padding: 0 10px;
-    color: var(--color-text-muted);
-    font-size: 12px;
-}
-
-.footer-text {
-    font-size: 14px;
-    margin-top: 20px;
-}
-
-.footer-text a {
-    color: var(--color-primary);
-}
-</style>

@@ -1,31 +1,28 @@
 import axios from 'axios';
 
-/**
- * Esta instância está pronta para quando a API real for conectada.
- * Atualmente o projeto opera local-first, mas as chamadas via Axios
- * devem seguir este padrão para facilitar a migração.
- */
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+    baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Interceptor para injetar Token JWT
+// Interceptor de Request: Envia o token em cada chamada
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('instaclone.token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
 
-// Interceptor para tratar expiração de sessão (401)
+// Interceptor de Response: Lida com erros globais (ex: token expirado)
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
+            localStorage.removeItem('instaclone.token');
+            // Só redireciona se não estivermos já na página de login
+            if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

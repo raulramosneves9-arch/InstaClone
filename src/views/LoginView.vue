@@ -1,62 +1,70 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
-const { login, loading, error } = useAuth();
+const authStore = useAuthStore();
 
-const email = ref('');
+const username = ref('');
 const password = ref('');
+const error = ref('');
+const isLoading = ref(false);
 
-async function handleSubmit() {
-    if (!email.value || !password.value) return;
+async function handleLogin() {
+    if (!username.value || !password.value) return;
+
+    isLoading.value = true;
+    error.value = '';
 
     try {
-        await login(email.value, password.value);
-        router.push('/feed');
+        await authStore.login(username.value, password.value);
+        router.replace('/feed');
     } catch (err) {
-        // Erro já é tratado pelo composable
-        console.error('Login failed:', err);
+        error.value = err.message;
+    } finally {
+        isLoading.value = false;
     }
 }
 </script>
 
 <template>
-    <div class="auth-container">
+    <div class="auth-page">
         <div class="auth-card">
-            <h1 class="logo">InstaClone</h1>
+            <h1 class="insta-logo">InstaClone</h1>
 
-            <form @submit.prevent="handleSubmit" class="auth-form">
-                <input v-model="email" type="email" placeholder="E-mail" required :disabled="loading" />
-                <input v-model="password" type="password" placeholder="Senha" required :disabled="loading" />
+            <form @submit.prevent="handleLogin" class="auth-form">
+                <input v-model="username" type="text" placeholder="Nome de usuário" required :disabled="isLoading" />
+                <input v-model="password" type="password" placeholder="Senha" required :disabled="isLoading" />
 
-                <button type="submit" :disabled="loading" class="btn-primary">
-                    {{ loading ? 'Entrando...' : 'Entrar' }}
+                <button type="submit" class="btn-primary" :disabled="isLoading">
+                    <span v-if="!isLoading">Entrar</span>
+                    <span v-else>Entrando...</span>
                 </button>
 
-                <p v-if="error" class="error-message">{{ error }}</p>
+                <p v-if="error" class="error-msg">{{ error }}</p>
             </form>
 
             <div class="divider">
                 <span>OU</span>
             </div>
 
-            <p class="signup-link">
-                Não tem uma conta? <router-link to="/register">Cadastre-se</router-link>
+            <p class="footer-text">
+                Não tem uma conta?
+                <router-link to="/register"><strong>Cadastre-se</strong></router-link>
             </p>
         </div>
     </div>
 </template>
 
 <style scoped>
-.auth-container {
+.auth-page {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
     background-color: var(--color-bg);
+    padding: 20px;
 }
 
 .auth-card {
@@ -68,11 +76,16 @@ async function handleSubmit() {
     text-align: center;
 }
 
-.logo {
+.insta-logo {
     font-family: 'Style Script', cursive, sans-serif;
-    /* Simulação da fonte do Insta */
     font-size: 3rem;
     margin-bottom: 30px;
+    background: linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end));
+    -webkit-background-clip: text;
+    /* Para navegadores baseados em Webkit */
+    background-clip: text;
+    /* Propriedade padrão para compatibilidade */
+    -webkit-text-fill-color: transparent;
 }
 
 .auth-form {
@@ -100,10 +113,9 @@ input {
 
 .btn-primary:disabled {
     opacity: 0.7;
-    cursor: not-allowed;
 }
 
-.error-message {
+.error-msg {
     color: var(--color-danger);
     font-size: 14px;
     margin-top: 15px;
@@ -126,13 +138,12 @@ input {
     font-size: 12px;
 }
 
-.signup-link {
-    margin-top: 20px;
+.footer-text {
     font-size: 14px;
+    margin-top: 20px;
 }
 
-.signup-link a {
+.footer-text a {
     color: var(--color-primary);
-    font-weight: bold;
 }
 </style>

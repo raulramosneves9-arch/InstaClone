@@ -1,62 +1,60 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import Spinner from '@/components/ui/Spinner.vue';
+import { useAuthStore } from '../../stores/auth';
+import Spinner from '../../components/ui/Spinner.vue';
 
-const router = useRouter();
 const authStore = useAuthStore();
+const router = useRouter();
 
 const email = ref('');
 const password = ref('');
-const error = ref('');
-const isLoading = ref(false);
+const loading = ref(false);
+const errorMsg = ref('');
 
-async function handleLogin() {
-    isLoading.value = true;
-    error.value = '';
+async function handleSubmit() {
+    loading.value = true;
+    errorMsg.value = '';
 
     try {
-        // Note: O backend Laravel geralmente usa 'email' em vez de 'username' para login
         await authStore.login(email.value, password.value);
-        router.replace('/');
+        router.push('/feed');
     } catch (err) {
-        error.value = err; // Mensagem vinda do interceptor da API
+        errorMsg.value = err;
     } finally {
-        isLoading.value = false;
+        loading.value = false;
     }
 }
 </script>
 
 <template>
     <div class="card p-4 shadow-sm border">
-        <h1 class="text-center logo mb-4" style="font-family: 'Style Script', cursive; font-size: 3rem;">
+        <h1 class="text-center mb-4 logo-font" style="font-family: 'Style Script', cursive; font-size: 3rem;">
             InstaClone
         </h1>
 
-        <form @submit.prevent="handleLogin">
-            <div class="mb-3">
-                <input v-model="email" type="email" class="form-control" placeholder="E-mail" required
-                    :disabled="isLoading" />
+        <form @submit.prevent="handleSubmit">
+            <div class="mb-2">
+                <input v-model="email" type="email" class="form-control bg-light" placeholder="E-mail" required />
             </div>
             <div class="mb-3">
-                <input v-model="password" type="password" class="form-control" placeholder="Senha" required
-                    :disabled="isLoading" />
+                <input v-model="password" type="password" class="form-control bg-light" placeholder="Senha" required />
             </div>
 
-            <Spinner type="submit" :loading="isLoading">
-                Entrar
-            </Spinner>
+            <button type="submit" class="btn btn-primary w-100 fw-bold" :disabled="loading">
+                <Spinner v-if="loading" />
+                <span v-else>Entrar</span>
+            </button>
 
-            <div v-if="error" class="alert alert-danger mt-3 py-2 small text-center" role="alert">
-                {{ error }}
+            <div v-if="errorMsg" class="alert alert-danger mt-3 py-2 small text-center">
+                {{ errorMsg }}
             </div>
         </form>
 
         <div class="text-center mt-4 pt-3 border-top">
-            <p class="mb-0">
+            <p class="mb-0 small">
                 Não tem uma conta?
-                <router-link to="/register" class="text-primary fw-bold text-decoration-none">Cadastre-se</router-link>
+                <router-link to="/cadastro" class="text-primary fw-bold text-decoration-none">Cadastre-se</router-link>
             </p>
         </div>
     </div>

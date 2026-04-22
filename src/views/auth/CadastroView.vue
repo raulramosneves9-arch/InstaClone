@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import BaseButton from '../components/ui/BaseButton.vue';
+import { useAuthStore } from '@/stores/auth';
+import Spinner from '@/components/ui/Spinner.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -72,9 +72,19 @@ async function handleRegister() {
                 <small v-if="errors.password" class="text-danger">{{ errors.password[0] }}</small>
             </div>
 
-            <BaseButton type="submit" :loading="isLoading">
+            <button type="submit" class="btn btn-primary w-100 fw-bold mt-3" :disabled="loading" style="height: 38px;">
+                <template v-if="loading">
+                    <Spinner />
+                </template>
+
+                <template v-else>
+                    Cadastrar
+                </template>
+            </button>
+
+            <Spinner type="submit" :loading="isLoading">
                 Cadastre-se
-            </BaseButton>
+            </Spinner>
 
             <div v-if="errors.general" class="alert alert-danger mt-3 py-2 small text-center">
                 {{ errors.general }}

@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue';
-import { useFeedStore } from '../stores/feed';
-import PostCard from '../components/PostCard.vue';
+import { useFeedStore } from '@/stores/feed';
+import PostCard from '@/components/post/PostCard.vue';
 
 const feedStore = useFeedStore();
 

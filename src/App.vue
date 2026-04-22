@@ -1,34 +1,22 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useAuthStore } from './stores/auth';
-import { useFeedStore } from './stores/feed';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import AuthLayout from './layouts/AuthLayout.vue';
+import AppLayout from './layouts/AppLayout.vue';
 
-const authStore = useAuthStore();
-const feedStore = useFeedStore();
+const route = useRoute();
+const layouts = {
+  AuthLayout,
+  AppLayout
+};
 
-onMounted(() => {
-  // Inicializa as stores com os dados do LocalStorage ou Mocks
-  authStore.init();
-  feedStore.init();
-});
+// Se não houver layout definido na rota, renderiza direto (ex: NotFound)
+const layout = computed(() => layouts[route.meta.layout] || null);
 </script>
 
 <template>
-  <router-view v-slot="{ Component }">
-    <transition name="fade" mode="out-in">
-      <component :is="Component" />
-    </transition>
-  </router-view>
+  <component :is="layout" v-if="layout">
+    <router-view />
+  </component>
+  <router-view v-else />
 </template>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

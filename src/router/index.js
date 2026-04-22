@@ -4,59 +4,64 @@ import { useAuthStore } from '../stores/auth';
 const routes = [
     {
         path: '/login',
-        name: 'Login',
+        name: 'login',
         component: () => import('../views/LoginView.vue'),
-        meta: { requiresAuth: false }
+        meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
         path: '/register',
-        name: 'Register',
+        name: 'register',
         component: () => import('../views/RegisterView.vue'),
-        meta: { requiresAuth: false }
+        meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
         path: '/',
-        redirect: '/feed'
-    },
-    {
-        path: '/feed',
-        name: 'Feed',
         component: () => import('../views/FeedView.vue'),
-        meta: { requiresAuth: true }
+        meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/create',
-        name: 'CreatePost',
+        path: '/post/create',
+        name: 'post.create',
         component: () => import('../views/CreatePostView.vue'),
-        meta: { requiresAuth: true }
+        meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
         path: '/profile/:username',
-        name: 'Profile',
+        name: 'profile',
         component: () => import('../views/ProfileView.vue'),
-        meta: { requiresAuth: true }
+        meta: { layout: 'AppLayout', requiresAuth: true }
     },
-    // Rota catch-all (404)
     {
         path: '/:pathMatch(.*)*',
-        redirect: '/feed'
+        name: 'not-found',
+        component: () => import('../views/NotFoundView.vue')
     }
 ];
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
+    scrollBehavior: () => ({ top: 0 })
 });
 
-// Navigation Guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
-    const isAuthenticated = authStore.isAuthenticated;
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/login');
-    } else if (!to.meta.requiresAuth && isAuthenticated && (to.name === 'Login' || to.name === 'Register')) {
-        next('/feed');
+    // Se tem token mas não tem user, tenta buscar o user (F5/Refresh)
+    if (authStore.token && !authStore.user) {
+        try {
+            await authStore.fetchMe();
+        } catch (e) {
+            authStore.logout();
+        }
+    }
+
+    const isAuth = authStore.isAuthenticated;
+
+    if (to.meta.requiresAuth && !isAuth) {
+        next({ name: 'login' });
+    } else if (to.meta.requiresGuest && isAuth) {
+        next({ path: '/' });
     } else {
         next();
     }

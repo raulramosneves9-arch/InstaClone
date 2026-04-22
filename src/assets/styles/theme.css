@@ -1,3 +1,10 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* Importar após o Bootstrap no main.js */
 :root {
     --color-gradient-start: #833ab4;
@@ -31,4 +38,16 @@ body {
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     border: 0;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font: inherit;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
 }

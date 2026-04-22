@@ -14,16 +14,15 @@ import Navbar from '../components/Navbar.vue';
 </template>
 
 <style scoped>
+/* Padding para mobile (navbar embaixo) e margem para desktop (sidebar lado) */
 .main-content {
-    margin-bottom: 60px;
-    /* Espaço para nav mobile */
+    padding-bottom: 60px;
 }
 
 @media (min-width: 768px) {
     .main-content {
-        margin-bottom: 0;
+        padding-bottom: 0;
         margin-left: 245px;
-        /* Espaço para sidebar desktop */
     }
 }
 </style>

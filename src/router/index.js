@@ -5,31 +5,42 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('../views/LoginView.vue'),
+        component: () => import('../views/auth/LoginView.vue'),
         meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
-        path: '/register',
-        name: 'register',
-        component: () => import('../views/RegisterView.vue'),
+        path: '/cadastro',
+        name: 'cadastro',
+        component: () => import('../views/auth/CadastroView.vue'),
         meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
-        path: '/',
+        path: '/feed',
+        name: 'feed',
         component: () => import('../views/FeedView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/post/create',
-        name: 'post.create',
-        component: () => import('../views/CreatePostView.vue'),
+        path: '/descubrir',
+        name: 'descubrir',
+        component: () => import('../views/DescubrirView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/profile/:username',
-        name: 'profile',
-        component: () => import('../views/ProfileView.vue'),
+        path: '/criar',
+        name: 'criar',
+        component: () => import('../views/CriarPostView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
+        path: '/perfil',
+        name: 'perfil',
+        component: () => import('../views/PerfilView.vue'),
+        meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
+        path: '/',
+        redirect: '/feed'
     },
     {
         path: '/:pathMatch(.*)*',
@@ -47,7 +58,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
-    // Se tem token mas não tem user, tenta buscar o user (F5/Refresh)
+    // Tenta restaurar sessão se houver token mas não houver user
     if (authStore.token && !authStore.user) {
         try {
             await authStore.fetchMe();
@@ -59,9 +70,9 @@ router.beforeEach(async (to, from, next) => {
     const isAuth = authStore.isAuthenticated;
 
     if (to.meta.requiresAuth && !isAuth) {
-        next({ name: 'login' });
+        next('/login');
     } else if (to.meta.requiresGuest && isAuth) {
-        next({ path: '/' });
+        next('/feed');
     } else {
         next();
     }

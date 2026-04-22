@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import BaseButton from '../components/ui/BaseButton.vue';
+import { useAuthStore } from '@/stores/auth';
+import Spinner from '@/components/ui/Spinner.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -44,9 +44,9 @@ async function handleLogin() {
                     :disabled="isLoading" />
             </div>
 
-            <BaseButton type="submit" :loading="isLoading">
+            <Spinner type="submit" :loading="isLoading">
                 Entrar
-            </BaseButton>
+            </Spinner>
 
             <div v-if="error" class="alert alert-danger mt-3 py-2 small text-center" role="alert">
                 {{ error }}

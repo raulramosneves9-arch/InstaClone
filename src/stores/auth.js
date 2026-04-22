@@ -12,60 +12,57 @@ export const useAuthStore = defineStore('auth', {
     },
 
     actions: {
+        // Inicializa a store (usado no App.vue)
         async init() {
             if (this.token) {
-                try {
-                    await this.fetchMe();
-                } catch (error) {
-                    this.logout();
-                }
+                await this.fetchMe();
             }
         },
 
+        // Busca os dados do usuário logado
+        async fetchMe() {
+            try {
+                const response = await api.get('/me');
+                this.user = response.data;
+            } catch (error) {
+                this.logout();
+            }
+        },
+
+        // Realiza o Login
         async login(email, password) {
             try {
-                // Endpoint: POST /api/auth/login
-                const { data } = await api.post('/auth/login', { email, password });
-
-                this.token = data.access_token;
-                this.user = data.user;
+                const response = await api.post('/auth/login', { email, password });
+                this.token = response.data.access_token;
+                this.user = response.data.user;
 
                 localStorage.setItem('instaclone.token', this.token);
-                api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
             } catch (error) {
-                throw error.response?.data?.message || 'Erro ao fazer login';
+                // Lança o erro para ser capturado pela View (LoginView)
+                const message = error.response?.data?.message || 'Erro ao entrar';
+                throw message;
             }
         },
 
-        async register(userData) {
+        // Realiza o Registro (Cadastro)
+        async register(formData) {
             try {
-                // Endpoint: POST /api/auth/register
-                const { data } = await api.post('/auth/register', userData);
-
-                this.token = data.access_token;
-                this.user = data.user;
+                const response = await api.post('/auth/register', formData);
+                this.token = response.data.access_token;
+                this.user = response.data.user;
 
                 localStorage.setItem('instaclone.token', this.token);
             } catch (error) {
-                throw error.response?.data?.errors || 'Erro no cadastro';
+                // Retorna os erros de validação do Laravel (e-mail já existe, etc)
+                throw error.response?.data?.errors || 'Erro ao cadastrar';
             }
         },
 
-        async fetchMe() {
-            const { data } = await api.get('/auth/me'); //
-            this.user = data;
-        },
-
+        // Logout
         logout() {
-            // Opcional: api.post('/auth/logout')
             this.user = null;
             this.token = null;
             localStorage.removeItem('instaclone.token');
-            delete api.defaults.headers.common['Authorization'];
-        },
-
-        updateProfile(updatedUser) {
-            this.user = { ...this.user, ...updatedUser };
         }
-    },
+    }
 });

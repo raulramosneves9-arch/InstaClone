@@ -1,38 +1,39 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useAuthStore } from './stores/auth';
-import AuthLayout from './layouts/AuthLayout.vue';
 import AppLayout from './layouts/AppLayout.vue';
+import AuthLayout from './layouts/AuthLayout.vue';
 
 const route = useRoute();
-const authStore = useAuthStore();
 
+// Mapeia os nomes que colocamos no router (meta: { layout: '...' })
 const layouts = {
-  AuthLayout,
-  AppLayout
+  AppLayout,
+  AuthLayout
 };
 
-// Determina qual layout usar baseado na meta da rota
-const layout = computed(() => layouts[route.meta.layout] || null);
-
-onMounted(() => {
-  authStore.init();
+// Computa qual layout usar baseado na rota atual
+const layout = computed(() => {
+  return layouts[route.meta.layout] || null;
 });
 </script>
 
 <template>
   <router-view v-slot="{ Component }">
     <transition name="fade" mode="out-in">
-      <component :is="layout" v-if="layout">
-        <component :is="Component" :key="route.fullPath" />
-      </component>
-      <component :is="Component" v-else :key="route.fullPath" />
+      <div :key="route.path">
+        <component :is="layout" v-if="layout">
+          <component :is="Component" />
+        </component>
+
+        <component :is="Component" v-else />
+      </div>
     </transition>
   </router-view>
 </template>
 
 <style>
+/* Seus estilos de transição */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -41,5 +42,12 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Estilos globais para resetar o body se necessário */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #fafafa;
 }
 </style>

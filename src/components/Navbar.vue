@@ -1,85 +1,61 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { useAuth } from '../composables/useAuth';
+import { computed } from 'vue';
+import { useAuthStore } from '../stores/auth';
 import Avatar from './ui/Avatar.vue';
 
-const router = useRouter();
-const { user, logout } = useAuth();
-
-// Ícones simplificados para o exemplo (no real seriam os SVGs do Insta)
-const navItems = [
-    { name: 'Feed', path: '/feed', icon: '🏠' },
-    { name: 'Explore', path: '/explore', icon: '🔍' },
-    { name: 'Criar', path: '/create', icon: '➕' },
-    { name: 'Notificações', path: '/notifications', icon: '❤️' },
-];
+const authStore = useAuthStore();
+const user = computed(() => authStore.user);
 </script>
 
 <template>
-    <nav class="nav-container">
-        <div class="nav-logo desktop-only">InstaClone</div>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo desktop-only">InstaClone</div>
 
-        <div class="nav-links">
-            <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="nav-item">
-                <span class="icon">{{ item.icon }}</span>
-                <span class="label desktop-only">{{ item.name }}</span>
-            </router-link>
+            <div class="nav-links">
+                <router-link to="/feed" class="nav-item">
+                    <span class="icon">🏠</span>
+                    <span class="label desktop-only">Página Inicial</span>
+                </router-link>
 
-            <router-link :to="`/profile/${user?.username}`" class="nav-item" v-if="user">
-                <Avatar :src="user.avatar" :username="user.username" size="sm" />
-                <span class="label desktop-only">Perfil</span>
-            </router-link>
+                <router-link to="/create" class="nav-item">
+                    <span class="icon">➕</span>
+                    <span class="label desktop-only">Criar</span>
+                </router-link>
 
-            <button @click="logout" class="nav-item logout-btn desktop-only">
-                <span class="icon">🚪</span>
-                <span class="label">Sair</span>
-            </button>
+                <router-link :to="`/profile/${user?.username}`" class="nav-item" v-if="user">
+                    <Avatar :src="user.avatar" :username="user.username" size="sm" />
+                    <span class="label desktop-only">Perfil</span>
+                </router-link>
+            </div>
         </div>
     </nav>
 </template>
 
 <style scoped>
-.nav-container {
-    display: flex;
+.navbar {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    position: fixed;
+    bottom: 0;
     width: 100%;
-    height: 100%;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.nav-logo {
-    font-family: 'Style Script', cursive;
-    font-size: 1.5rem;
-    padding: 20px;
-    margin-bottom: 20px;
+    height: 60px;
+    z-index: 100;
 }
 
 .nav-links {
     display: flex;
-    width: 100%;
     justify-content: space-around;
+    align-items: center;
+    height: 100%;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 12px;
-    border-radius: var(--radius-md);
-    transition: background 0.2s;
+    gap: 12px;
+    padding: 8px;
     color: var(--color-text);
-}
-
-.nav-item:hover {
-    background-color: var(--color-bg);
-}
-
-.nav-item.router-link-active {
-    font-weight: bold;
-}
-
-.icon {
-    font-size: 24px;
 }
 
 .desktop-only {
@@ -87,24 +63,33 @@ const navItems = [
 }
 
 @media (min-width: 768px) {
-    .nav-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
+    .navbar {
+        width: 245px;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        border-top: none;
+        border-right: 1px solid var(--color-border);
+    }
+
+    .nav-content {
+        padding: 20px;
+    }
+
+    .logo {
+        font-family: cursive;
+        font-size: 24px;
+        margin-bottom: 30px;
     }
 
     .nav-links {
         flex-direction: column;
-        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 10px;
     }
 
     .desktop-only {
         display: block;
-    }
-
-    .nav-item {
-        width: 90%;
-        margin: 4px 10px;
     }
 }
 </style>

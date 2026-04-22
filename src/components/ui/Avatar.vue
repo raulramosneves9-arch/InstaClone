@@ -4,7 +4,7 @@ import { ref } from 'vue';
 const props = defineProps({
     src: String,
     username: { type: String, default: 'U' },
-    size: { type: String, default: 'md' } // sm (32px), md (44px), lg (80px)
+    size: { type: String, default: 'md' } // sm, md, lg
 });
 
 const hasError = ref(false);
@@ -28,7 +28,7 @@ const getInitial = () => props.username.charAt(0).toUpperCase();
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-border);
+    background-color: var(--color-border);
     flex-shrink: 0;
 }
 
@@ -39,14 +39,14 @@ const getInitial = () => props.username.charAt(0).toUpperCase();
 }
 
 .avatar-fallback {
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(45deg, var(--color-gradient-start), var(--color-gradient-end));
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(45deg, var(--color-gradient-start), var(--color-gradient-end));
+    color: white;
+    font-weight: bold;
 }
 
 .sm {

@@ -3,64 +3,74 @@ import api from '../services/api';
 
 export const useFeedStore = defineStore('feed', {
     state: () => ({
-        postsById: {},      // Dicionário para acesso rápido
-        feedOrder: [],      // IDs ordenados
+        postsById: {},
+        feedOrder: [],
+        isLoading: false,
         nextCursor: null,
-        isLoading: false
     }),
 
     getters: {
-        feedPosts: (state) => state.feedOrder.map(id => state.postsById[id])
+        // Transforma o objeto de IDs de volta em uma lista para o v-for do FeedView
+        feedPosts: (state) => state.feedOrder.map(id => state.postsById[id]),
     },
 
     actions: {
         async fetchFeed() {
             this.isLoading = true;
             try {
-                // Endpoint: GET /api/feed
+                // O api.js já coloca o token automaticamente no cabeçalho
                 const { data } = await api.get('/feed');
 
-                // Normalização dos dados
-                data.data.forEach(post => {
+                //data.data costuma ser onde o Laravel coloca a lista na paginação
+                const posts = data.data || data;
+
+                posts.forEach(post => {
                     this.postsById[post.id] = post;
                 });
 
-                this.feedOrder = data.data.map(post => post.id);
-                this.nextCursor = data.next_cursor;
+                this.feedOrder = posts.map(post => post.id);
+                this.nextCursor = data.next_cursor || null;
+            } catch (error) {
+                console.error("Erro ao carregar feed:", error);
             } finally {
                 this.isLoading = false;
             }
         },
 
+        // AÇÃO PARA O MÓDULO 6: Criar Post
+        async createPost(formData) {
+            try {
+                // multipart/form-data é obrigatório para enviar arquivos/fotos
+                const { data } = await api.post('/posts', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                // Adiciona o novo post no topo da lista
+                this.postsById[data.id] = data;
+                this.feedOrder.unshift(data.id);
+
+                return data;
+            } catch (error) {
+                throw error.response?.data?.message || 'Erro ao publicar post';
+            }
+        },
+
+        // AÇÃO PARA CURTIR:
         async toggleLike(postId) {
             const post = this.postsById[postId];
             if (!post) return;
 
-            // Atualização Otimista: muda na tela antes de ir pro banco
-            const originalState = { ...post };
+            // Otimismo visual: muda na tela antes mesmo da API responder
             post.isLiked = !post.isLiked;
-            post.likesCount += post.isLiked ? 1 : -1;
+            post.likes_count += post.isLiked ? 1 : -1;
 
             try {
-                if (post.isLiked) {
-                    await api.post(`/posts/${postId}/like`); //
-                } else {
-                    await api.delete(`/posts/${postId}/unlike`); //
-                }
+                await api.post(`/posts/${postId}/like`);
             } catch (error) {
-                // Reverte se a API falhar
-                this.postsById[postId] = originalState;
+                // Se der erro na API, desfaz a mudança visual
+                post.isLiked = !post.isLiked;
+                post.likes_count += post.isLiked ? 1 : -1;
             }
-        },
-
-        async createPost(formData) {
-            // Recebe FormData para suportar upload de arquivos reais
-            const { data } = await api.post('/posts', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            this.postsById[data.id] = data;
-            this.feedOrder.unshift(data.id); // Novo post no topo
         }
     }
 });

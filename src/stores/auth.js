@@ -22,10 +22,17 @@ export const useAuthStore = defineStore('auth', {
         // Busca os dados do usuário logado
         async fetchMe() {
             try {
-                const response = await api.get('/me');
+                // Tentamos /user, que é o padrão do Laravel Sanctum
+                const response = await api.get('/user');
                 this.user = response.data;
             } catch (error) {
-                this.logout();
+                console.warn("Rota /user não encontrada, tentando /me...");
+                try {
+                    const response = await api.get('/me');
+                    this.user = response.data;
+                } catch (e) {
+                    this.logout();
+                }
             }
         },
 

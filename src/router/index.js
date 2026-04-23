@@ -33,6 +33,12 @@ const routes = [
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
+        path: '/descobrir',
+        name: 'descobrir',
+        component: () => import('../views/DescobrirView.vue'),
+        meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
         path: '/',
         redirect: '/feed'
     },

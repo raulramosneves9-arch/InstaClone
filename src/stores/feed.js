@@ -6,6 +6,7 @@ export const useFeedStore = defineStore('feed', {
         postsById: {},
         feedOrder: [],
         isLoading: false,
+        isFetchingMore: false,
         nextCursor: null,
     }),
 
@@ -31,6 +32,28 @@ export const useFeedStore = defineStore('feed', {
                 console.error("Erro ao carregar feed:", error);
             } finally {
                 this.isLoading = false;
+            }
+        },
+
+        async loadMoreFeed() {
+            if (!this.nextCursor || this.isFetchingMore) return;
+            this.isFetchingMore = true;
+            try {
+                const { data } = await api.get(`/feed?cursor=${this.nextCursor}`);
+                const posts = data.data || data;
+
+                posts.forEach(post => {
+                    this.postsById[post.id] = post;
+                    if (!this.feedOrder.includes(post.id)) {
+                        this.feedOrder.push(post.id);
+                    }
+                });
+
+                this.nextCursor = data.next_cursor || null;
+            } catch (error) {
+                console.error("Erro ao carregar mais feed:", error);
+            } finally {
+                this.isFetchingMore = false;
             }
         },
 

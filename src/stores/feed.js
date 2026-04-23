@@ -66,11 +66,13 @@ export const useFeedStore = defineStore('feed', {
                     }
                 });
 
-                // Adiciona o post retornado pelo back no topo do feed
-                this.postsById[data.id] = data;
-                this.feedOrder.unshift(data.id);
+                const postData = data.data || data;
 
-                return data;
+                // Adiciona o post retornado pelo back no topo do feed
+                this.postsById[postData.id] = postData;
+                this.feedOrder.unshift(postData.id);
+
+                return postData;
             } catch (error) {
                 console.error("Erro no upload:", error);
                 throw error.response?.data?.message || 'Erro ao publicar post';

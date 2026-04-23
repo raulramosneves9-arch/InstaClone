@@ -6,8 +6,10 @@ import PostCard from '@/components/post/PostCard.vue';
 const feedStore = useFeedStore();
 
 onMounted(async () => {
-    // Só busca se o feed estiver vazio ou para atualizar
-    await feedStore.fetchFeed();
+    // Só busca se o feed estiver vazio
+    if (feedStore.feedOrder.length === 0) {
+        await feedStore.fetchFeed();
+    }
 });
 </script>
 

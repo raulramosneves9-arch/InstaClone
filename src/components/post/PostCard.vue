@@ -74,7 +74,7 @@ const formatImageUrl = (url) => {
                     placeholder="Adicione um comentário...">
                 <button type="submit" class="btn btn-link btn-sm text-primary fw-bold text-decoration-none"
                     :disabled="!commentContent.trim()">
-                    Publicar
+                    Comentar
                 </button>
             </form>
         </div>

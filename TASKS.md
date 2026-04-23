@@ -112,27 +112,27 @@ Lista de tarefas para reconstruir o frontend. Cada item descreve comportamento e
 
 ## 9 - Detalhes do Post (`/posts/:postId`)
 
-- [ ] `GET /posts/:id` carrega o post
-- [ ] `GET /posts/:id/comments` carrega comentarios com paginacao por pagina
-- [ ] Botao "carregar mais" para comentarios
-- [ ] Campo para adicionar comentario: `POST /posts/:id/comments`
-- [ ] `DELETE /comments/:id` disponivel apenas para o autor do comentario
-- [ ] `DELETE /posts/:id` disponivel apenas para o autor do post; redireciona para `/feed` apos sucesso
-- [ ] Contadores de curtidas e comentarios vem do payload do backend
+- [x] `GET /posts/:id` carrega o post
+- [x] `GET /posts/:id/comments` carrega comentarios com paginacao por pagina
+- [x] Botao "carregar mais" para comentarios
+- [x] Campo para adicionar comentario: `POST /posts/:id/comments`
+- [x] `DELETE /comments/:id` disponivel apenas para o autor do comentario
+- [x] `DELETE /posts/:id` disponivel apenas para o autor do post; redireciona para `/feed` apos sucesso
+- [x] Contadores de curtidas e comentarios vem do payload do backend
 
 ## 10 - 404
 
-- [ ] View `NotFound` com link para `/feed` (autenticado) ou `/login` (visitante)
+- [x] View `NotFound` com link para `/feed` (autenticado) ou `/login` (visitante)
 
 ## 11 - Docker e Entrega
 
-- [ ] `Dockerfile` multi-stage:
+- [x] `Dockerfile` multi-stage:
   - stage `build`: `node:22-alpine`, roda `npm ci` e `npm run build`
   - stage runtime: `nginx:1.27-alpine` servindo `/usr/share/nginx/html`
-- [ ] `docker/nginx.conf` com `try_files $uri $uri/ /index.html` para o history mode do Vue Router
-- [ ] `compose.yaml` expondo `3000:80` e passando `VITE_API_URL` como build-arg
-- [ ] `.dockerignore` excluindo `node_modules`, `dist`, `.env`, preservando `.env.example`
-- [ ] `npm run build` gera bundle de producao em `dist/`
+- [x] `docker/nginx.conf` com `try_files $uri $uri/ /index.html` para o history mode do Vue Router
+- [x] `compose.yaml` expondo `3000:80` e passando `VITE_API_URL` como build-arg
+- [x] `.dockerignore` excluindo `node_modules`, `dist`, `.env`, preservando `.env.example`
+- [x] `npm run build` gera bundle de producao em `dist/`
 
 ## Endpoints consumidos (resumo)
 

@@ -51,6 +51,12 @@ const routes = [
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
+        path: '/posts/:postId',
+        name: 'post-details',
+        component: () => import('../views/PostDetailsView.vue'),
+        meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
         path: '/',
         redirect: '/feed'
     },

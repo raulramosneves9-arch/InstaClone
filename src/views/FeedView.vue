@@ -25,6 +25,16 @@ onMounted(async () => {
                 <template v-else>
                     <div v-if="feedStore.feedPosts.length > 0">
                         <PostCard v-for="post in feedStore.feedPosts" :key="post.id" :post="post" />
+                        <div v-if="feedStore.nextCursor" class="text-center py-4">
+                            <button 
+                                class="btn btn-outline-primary" 
+                                :disabled="feedStore.isFetchingMore" 
+                                @click="feedStore.loadMoreFeed()"
+                            >
+                                <span v-if="feedStore.isFetchingMore" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Carregar mais
+                            </button>
+                        </div>
                     </div>
 
                     <div v-else class="text-center py-5 bg-white border rounded">

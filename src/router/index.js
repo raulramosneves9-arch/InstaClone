@@ -33,6 +33,18 @@ const routes = [
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
+        path: '/perfil/editar',
+        name: 'perfil-editar',
+        component: () => import('../views/EditarPerfilView.vue'),
+        meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
+        path: '/perfil/lista/:type',
+        name: 'perfil-lista',
+        component: () => import('../views/ListaConexaoView.vue'),
+        meta: { layout: 'AppLayout', requiresAuth: true }
+    },
+    {
         path: '/descobrir',
         name: 'descobrir',
         component: () => import('../views/DescobrirView.vue'),

@@ -68,47 +68,47 @@ Lista de tarefas para reconstruir o frontend. Cada item descreve comportamento e
 
 ## 6 - Criar Post (`/criar`)
 
-- [ ] Input `<input type="file">` aceita apenas `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
-- [ ] Limite de 5 MB (validar no cliente antes do upload)
-- [ ] Preview local com `URL.createObjectURL`; revogar o blob ao trocar imagem, limpar ou desmontar
-- [ ] Campo de legenda com limite de `2200` caracteres e contador visivel
-- [ ] Botao de publicar desabilitado enquanto imagem ou legenda estao ausentes
-- [ ] `POST /posts` com `FormData` contendo `image` e `caption`
-- [ ] Exibir feedback de sucesso (redirecionar para `/feed`) e mensagens de erro
+- [x] Input `<input type="file">` aceita apenas `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
+- [x] Limite de 5 MB (validar no cliente antes do upload)
+- [x] Preview local com `URL.createObjectURL`; revogar o blob ao trocar imagem, limpar ou desmontar
+- [x] Campo de legenda com limite de `2200` caracteres e contador visivel
+- [x] Botao de publicar desabilitado enquanto imagem ou legenda estao ausentes
+- [x] `POST /posts` com `FormData` contendo `image` e `caption`
+- [x] Exibir feedback de sucesso (redirecionar para `/feed`) e mensagens de erro
 
 ## 7 - Perfil (`/perfil` e `/perfil?user=<username>`)
 
-- [ ] `GET /users/{username}` resolve o perfil alvo
-- [ ] Em paralelo, carregar:
+- [x] `GET /users/{username}` resolve o perfil alvo
+- [x] Em paralelo, carregar:
   - `GET /users/{id}/posts` (grid de posts)
   - `GET /users/{id}/followers` (contador)
   - `GET /users/{id}/following` (contador)
-- [ ] Para perfis de terceiros, consultar `GET /users/{id}/is-following` para decidir o estado do botao
-- [ ] Acoes:
+- [x] Para perfis de terceiros, consultar `GET /users/{id}/is-following` para decidir o estado do botao
+- [x] Acoes:
   - seguir: `POST /users/:id/follow`
   - deixar de seguir: `DELETE /users/:id/unfollow`
-- [ ] Botao "Editar perfil" aparece apenas no proprio perfil e leva a `/perfil/editar`
-- [ ] Contadores de seguidores e seguindo levam a `/perfil/lista/seguidores` e `/perfil/lista/seguindo` (preservando o `?user=` quando for perfil de terceiros)
-- [ ] Grid de posts: clicar em um post abre `/posts/:postId`
+- [x] Botao "Editar perfil" aparece apenas no proprio perfil e leva a `/perfil/editar`
+- [x] Contadores de seguidores e seguindo levam a `/perfil/lista/seguidores` e `/perfil/lista/seguindo` (preservando o `?user=` quando for perfil de terceiros)
+- [x] Grid de posts: clicar em um post abre `/posts/:postId`
 
 ## 7.1 - Editar Perfil (`/perfil/editar`)
 
-- [ ] `PUT /users/me` com `{ name, username, bio }`
-- [ ] `POST /users/me/avatar` com `FormData` contendo `avatar`
-- [ ] Limites validados no cliente:
+- [x] `PUT /users/me` com `{ name, username, bio }`
+- [x] `POST /users/me/avatar` com `FormData` contendo `avatar`
+- [x] Limites validados no cliente:
   - `name`: 255 caracteres
   - `username`: 30 caracteres, regex `^[A-Za-z0-9._]+$`
   - `bio`: 500 caracteres
   - avatar: 2 MB
-- [ ] Mensagens de erro por campo vindas do backend
+- [x] Mensagens de erro por campo vindas do backend
 
 ## 8 - Listas de Conexao (`/perfil/lista/:type`)
 
-- [ ] `:type` aceita `seguidores` ou `seguindo`
-- [ ] Respeita `?user=<username>` para listar conexoes de outro perfil
-- [ ] `GET /users/{id}/followers` e `GET /users/{id}/following` com paginacao por pagina
-- [ ] Cada linha mostra avatar, nome, username e botao de seguir / deixar de seguir
-- [ ] Botao de voltar para o perfil de origem
+- [x] `:type` aceita `seguidores` ou `seguindo`
+- [x] Respeita `?user=<username>` para listar conexoes de outro perfil
+- [x] `GET /users/{id}/followers` e `GET /users/{id}/following` com paginacao por pagina
+- [x] Cada linha mostra avatar, nome, username e botao de seguir / deixar de seguir
+- [x] Botao de voltar para o perfil de origem
 
 ## 9 - Detalhes do Post (`/posts/:postId`)
 

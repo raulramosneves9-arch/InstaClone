@@ -34,7 +34,10 @@ const handleLogout = () => {
                 </li>
                 <li class="nav-item">
                     <router-link to="/perfil" class="nav-link d-flex align-items-center gap-3 text-dark">
-                        <div class="user-avatar-nav bg-secondary text-white rounded-circle">
+                        <div v-if="authStore.user?.avatar" class="user-avatar-nav rounded-circle overflow-hidden">
+                            <img :src="authStore.user.avatar" class="w-100 h-100 object-fit-cover" alt="User Avatar">
+                        </div>
+                        <div v-else class="user-avatar-nav bg-secondary text-white rounded-circle">
                             {{ authStore.user?.name?.charAt(0).toUpperCase() || 'U' }}
                         </div>
                         <span class="d-none d-xl-block">Perfil</span>

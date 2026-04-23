@@ -27,12 +27,6 @@ const handleLogout = () => {
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link to="/descubrir" class="nav-link d-flex align-items-center gap-3 text-dark">
-                        <i class="bi bi-compass fs-4"></i>
-                        <span class="d-none d-xl-block">Explorar</span>
-                    </router-link>
-                </li>
-                <li class="nav-item">
                     <router-link to="/criar" class="nav-link d-flex align-items-center gap-3 text-dark">
                         <i class="bi bi-plus-square fs-4"></i>
                         <span class="d-none d-xl-block">Criar</span>

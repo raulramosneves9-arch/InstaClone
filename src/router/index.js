@@ -21,12 +21,6 @@ const routes = [
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/descubrir',
-        name: 'descubrir',
-        component: () => import('../views/DescubrirView.vue'),
-        meta: { layout: 'AppLayout', requiresAuth: true }
-    },
-    {
         path: '/criar',
         name: 'criar',
         component: () => import('../views/CriarPostView.vue'),

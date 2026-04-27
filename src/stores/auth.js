@@ -22,11 +22,10 @@ export const useAuthStore = defineStore('auth', {
         // Busca os dados do usuário logado
         async fetchMe() {
             try {
-                // Utiliza a rota correta da API conforme documentação
                 const response = await api.get('/auth/me');
                 this.user = response.data;
             } catch (error) {
-                this.logout();
+                await this.logout();
             }
         },
 
@@ -59,8 +58,14 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        // Logout
-        logout() {
+        // Logout: tenta invalidar token na API e sempre limpa sessão local
+        async logout() {
+            try {
+                await api.post('/auth/logout');
+            } catch (error) {
+                // Em token expirado/inválido, ainda precisamos encerrar a sessão local.
+            }
+
             this.user = null;
             this.token = null;
             localStorage.removeItem('instaclone.token');

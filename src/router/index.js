@@ -1,58 +1,64 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { ROUTE_NAMES } from './routeNames';
 
 const routes = [
     {
         path: '/login',
-        name: 'login',
+        name: ROUTE_NAMES.LOGIN,
         component: () => import('../views/auth/LoginView.vue'),
         meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
         path: '/cadastro',
-        name: 'cadastro',
+        name: ROUTE_NAMES.CADASTRO,
         component: () => import('../views/auth/CadastroView.vue'),
         meta: { layout: 'AuthLayout', requiresGuest: true }
     },
     {
         path: '/feed',
-        name: 'feed',
+        name: ROUTE_NAMES.FEED,
         component: () => import('../views/FeedView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/criar',
-        name: 'criar',
+        path: '/create',
+        alias: '/criar',
+        name: ROUTE_NAMES.CRIAR,
         component: () => import('../views/CriarPostView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/perfil',
-        name: 'perfil',
+        path: '/profile',
+        alias: '/perfil',
+        name: ROUTE_NAMES.PERFIL,
         component: () => import('../views/PerfilView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/perfil/editar',
-        name: 'perfil-editar',
+        path: '/profile/edit',
+        alias: '/perfil/editar',
+        name: ROUTE_NAMES.PERFIL_EDITAR,
         component: () => import('../views/EditarPerfilView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/perfil/lista/:type',
-        name: 'perfil-lista',
+        path: '/profile/list/:type',
+        alias: '/perfil/lista/:type',
+        name: ROUTE_NAMES.PERFIL_LISTA,
         component: () => import('../views/ListaConexaoView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
-        path: '/descobrir',
-        name: 'descobrir',
+        path: '/discover',
+        alias: '/descobrir',
+        name: ROUTE_NAMES.DESCOBRIR,
         component: () => import('../views/DescobrirView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
     {
         path: '/posts/:postId',
-        name: 'post-details',
+        name: ROUTE_NAMES.POST_DETAILS,
         component: () => import('../views/PostDetailsView.vue'),
         meta: { layout: 'AppLayout', requiresAuth: true }
     },
@@ -62,7 +68,7 @@ const routes = [
     },
     {
         path: '/:pathMatch(.*)*',
-        name: 'not-found',
+        name: ROUTE_NAMES.NOT_FOUND,
         component: () => import('../views/NotFoundView.vue')
     }
 ];
@@ -81,7 +87,7 @@ router.beforeEach(async (to, from, next) => {
         try {
             await authStore.fetchMe();
         } catch (e) {
-            authStore.logout();
+            await authStore.logout();
         }
     }
 

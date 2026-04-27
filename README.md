@@ -1,32 +1,119 @@
-📸 InstaClone — Frontend (Vue.js 3)
-Visão Geral
-O InstaClone é uma rede social inspirada no Instagram, construída como projeto final da disciplina. O objetivo é aplicar todos os conceitos vistos ao longo do curso.
+# InstaClone - Frontend (Vue 3)
 
-Este repositório contém o frontend do projeto: uma SPA (Single Page Application) construída com Vue.js 3 que consome a API RESTful do backend. A interface replica a experiência do Instagram com foco em mobile-first, comunicando-se com o servidor exclusivamente via JSON.
+Frontend SPA do InstaClone usando Vue 3 + Vite + Pinia + Vue Router.
+Este README foi atualizado para refletir o estado atual do código no repositório.
 
-Autenticação
-As telas de login e cadastro permitem que o usuário acesse a plataforma. O token JWT recebido da API é salvo no localStorage e enviado em todas as requisições protegidas via interceptors do Axios. Usuários autenticados são redirecionados automaticamente para o feed; acessos sem token são bloqueados por guards de rota.
+## Tecnologias
 
-Layout Principal
-A navegação é feita por uma barra inferior (mobile) ou lateral (desktop) com links para Home, Explorar, Criar Post, Notificações e Perfil. O layout base utiliza slots para áreas de conteúdo dinâmico (header, main, footer) e componentes dinâmicos (<component :is>) para troca de views.
+- Vue 3 (Composition API com `<script setup>`)
+- Vite 8
+- Pinia
+- Vue Router
+- Axios
+- Bootstrap 5 + Bootstrap Icons
 
-Feed
-O feed exibe os posts das pessoas que o usuário segue, com scroll infinito ou paginação. Cada post mostra imagem, legenda, contagem de curtidas, comentários e data. É possível curtir/descurtir e comentar diretamente no feed, além de navegar para o perfil do autor.
+## Requisitos
 
-Stories
-A barra de stories aparece no topo do feed. O visualizador exibe o story em tela cheia com barra de progresso e navegação por tap. Stories já vistos são diferenciados dos novos, e há uma tela dedicada para criação de story com upload de imagem.
+- Node.js `^20.19.0 || >=22.12.0`
 
-Criar Post
-Tela de upload com preview da imagem, campo de legenda e botão de publicar. Exibe feedback visual de sucesso ou erro após a requisição.
+## Como rodar
 
-Perfil
-A tela de perfil exibe foto, bio e contadores de posts, seguidores e seguindo, com um grid dos posts do usuário. Em perfis alheios aparece o botão seguir/deixar de seguir; no perfil próprio, o botão de editar perfil (foto, nome, bio). Há também listagens de seguidores e seguindo.
+```bash
+npm install
+npm run dev
+```
 
-Explorar
-Grid de posts populares com barra de busca para encontrar usuários por nome ou username. Os resultados de busca linkam para o perfil encontrado.
+App em desenvolvimento: `http://localhost:5173`
 
-Notificações
-Listagem de notificações dos tipos curtida, comentário e novo seguidor, com opção de marcar como lida. Polling periódico verifica novas notificações e exibe um badge no ícone da navbar.
+Build de produção:
 
-Detalhes do Post
-Tela individual com listagem completa de comentários paginados, campo para adicionar comentário, contagem de curtidas e botão de deletar (visível apenas para o dono do post).
+```bash
+npm run build
+npm run preview
+```
+
+## Variáveis de ambiente
+
+Arquivo `.env.example`:
+
+```env
+VITE_API_URL=http://localhost:8000/api
+```
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+Frontend disponível em `http://localhost:3000`.
+
+## Estrutura atual
+
+```txt
+src/
+  assets/styles/theme.css
+  components/
+    post/PostCard.vue
+    ui/Avatar.vue
+    ui/ConfirmModal.vue
+    ui/Spinner.vue
+    Navbar.vue
+  layouts/
+    AppLayout.vue
+    AuthLayout.vue
+  router/index.js
+  services/api.js
+  stores/
+    auth.js
+    feed.js
+    discover.js
+  utils/
+    date.js
+    format.js
+  views/
+    FeedView.vue
+    CriarPostView.vue
+    DescobrirView.vue
+    PerfilView.vue
+    EditarPerfilView.vue
+    ListaConexaoView.vue
+    PostDetailsView.vue
+    NotFoundView.vue
+    auth/
+      LoginView.vue
+      CadastroView.vue
+```
+
+## Rotas atuais
+
+- `/login`
+- `/cadastro`
+- `/feed`
+- `/criar`
+- `/descobrir`
+- `/perfil`
+- `/perfil/editar`
+- `/perfil/lista/:type`
+- `/posts/:postId`
+- `/:pathMatch(.*)*` (404)
+
+## O que já está implementado
+
+- Autenticação com persistência de token em `localStorage` (`instaclone.token`)
+- Guardas de rota para páginas autenticadas e guest
+- Feed com carregamento inicial e paginação por cursor
+- Criar post com upload de imagem + legenda
+- Curtir e comentar no feed e na tela de detalhes do post
+- Descobrir usuários com paginação e ação de seguir/deixar de seguir
+- Perfil próprio e de terceiros, incluindo lista de posts
+- Editar perfil (dados básicos e avatar)
+- Lista de conexões (seguidores/seguindo)
+- Build multi-stage com Nginx para SPA (history mode)
+
+## Observações importantes do estado atual
+
+- Os nomes de rota e paths estão em português (ex.: `/criar`, `/perfil`).
+- Existe apenas um serviço Axios central (`src/services/api.js`), sem separação por domínio.
+- Não há `stores/follows.js`, `routeNames.js`, `composables/useImageUpload.js` ou componentes separados de comentário.
+- Alguns itens planejados em `TASKS.md` ainda não estão concluídos.

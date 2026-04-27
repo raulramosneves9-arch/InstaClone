@@ -18,7 +18,7 @@ onMounted(async () => {
         <div class="feed-main">
 
                 <div v-if="feedStore.isLoading" class="d-flex justify-content-center py-5">
-                    <div class="spinner-border text-primary" role="status">
+                    <div class="spinner-border" style="color: var(--accent);" role="status">
                         <span class="visually-hidden">Carregando...</span>
                     </div>
                 </div>
@@ -26,9 +26,9 @@ onMounted(async () => {
                 <template v-else>
                     <div v-if="feedStore.feedPosts.length > 0">
                         <PostCard v-for="post in feedStore.feedPosts" :key="post.id" :post="post" />
-                        <div v-if="feedStore.nextCursor" class="text-center py-4">
+                        <div v-if="feedStore.nextCursor" class="d-flex justify-content-center py-4">
                             <button
-                                class="btn btn-outline-primary load-more-btn"
+                                class="btn-ig-ghost load-more-btn"
                                 :disabled="feedStore.isFetchingMore"
                                 @click="feedStore.loadMoreFeed()"
                             >
@@ -38,11 +38,11 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <div v-else class="text-center py-5 empty-state border rounded">
-                        <i class="bi bi-camera fs-1 text-muted"></i>
+                    <div v-else class="empty-state text-center">
+                        <i class="bi bi-camera fs-1" style="color: var(--text-secondary);"></i>
                         <h4 class="mt-3">Nenhuma publicação ainda</h4>
-                        <p class="text-muted">Siga pessoas ou crie seu primeiro post!</p>
-                        <router-link to="/create" class="btn btn-primary btn-sm mt-2">
+                        <p style="color: var(--text-secondary);">Siga pessoas ou crie seu primeiro post!</p>
+                        <router-link to="/create" class="btn-ig mt-3 d-inline-flex">
                             Criar minha primeira publicação
                         </router-link>
                     </div>
@@ -64,13 +64,15 @@ onMounted(async () => {
 }
 
 .feed-main {
-    max-width: 600px;
+    max-width: 470px;
     width: 100%;
 }
 
 .empty-state {
     background-color: var(--bg-secondary);
-    border-color: var(--border) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 40px 16px;
 }
 
 .load-more-btn {

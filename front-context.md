@@ -8,7 +8,8 @@ Documento resumido do estado real implementado no frontend.
 - Pinia
 - Vue Router
 - Axios
-- Bootstrap 5 + Bootstrap Icons
+- Bootstrap 5 (Layout apenas) + Bootstrap Icons
+- Custom Design System (Instagram-like) via `theme.css`
 
 ## Estrutura atual
 
@@ -35,6 +36,8 @@ Documento resumido do estado real implementado no frontend.
 - Persistência de token em `localStorage` com chave `instaclone.token`
 - Interceptor de request adiciona `Authorization: Bearer <token>`
 - Interceptor de response para `401` remove token e redireciona para `/login`
+- **Design System Customizado**: Classes customizadas para botões (`.btn-ig`, `.btn-ig-ghost`, `.btn-ig-text`), paginação (`.ig-pagination`) e mensagens de erro (`.error-msg`) para evitar dependência do visual do Bootstrap.
+- **Refatoração Visual**: Views principais (`Feed`, `Perfil`, `PostDetails`, `ListaConexao`, `NotFound`) refatoradas para layout minimalista e responsivo (ex: Feed com 470px, PostDetails com layout dividido).
 
 ## Divergências em relação ao plano original
 

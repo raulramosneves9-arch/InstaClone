@@ -33,56 +33,55 @@ const avatarUrl = computed(() =>
 
 <template>
     <div
-        class="card border cursor-pointer rounded-3 account-card"
-        :class="compact ? 'account-card-compact' : 'h-100 text-center'"
+        class="account-card d-flex align-items-center gap-3 p-3"
+        :class="{ 'compact': compact }"
         @click="emit('click', user)"
     >
-        <div class="card-body" :class="compact ? 'd-flex align-items-center gap-3' : 'd-flex flex-column align-items-center'">
-            <img
-                :src="avatarUrl"
-                class="rounded-circle border"
-                :class="compact ? '' : 'mb-3'"
-                :style="compact ? 'width: 56px; height: 56px; object-fit: cover;' : 'width: 80px; height: 80px; object-fit: cover;'"
-                alt="Avatar"
-            >
-            <div :class="compact ? 'flex-grow-1 min-w-0' : 'w-100'">
-                <h5 class="card-title mb-0 text-truncate w-100 fw-semibold">{{ user.name }}</h5>
-                <p class="card-text text-muted small mb-0" :class="compact ? '' : 'mb-3'">@{{ user.username }}</p>
-            </div>
-
-            <button
-                v-if="showFollowButton"
-                class="btn btn-sm"
-                :class="[isFollowing ? 'btn-outline-secondary' : 'btn-primary', compact ? 'ms-auto' : 'mt-auto']"
-                :disabled="isPending"
-                @click.stop="emit('toggle-follow', user)"
-            >
-                {{ isFollowing ? 'Seguindo' : 'Seguir' }}
-            </button>
+        <img
+            :src="avatarUrl"
+            class="rounded-circle border"
+            :style="compact ? 'width: 44px; height: 44px; object-fit: cover;' : 'width: 56px; height: 56px; object-fit: cover;'"
+            alt="Avatar"
+        >
+        <div class="flex-grow-1 min-w-0">
+            <h5 class="account-name mb-0 text-truncate fw-semibold">{{ user.name }}</h5>
+            <p class="account-username text-muted small mb-0">@{{ user.username }}</p>
         </div>
+
+        <button
+            v-if="showFollowButton"
+            class="btn-sm"
+            :class="isFollowing ? 'btn-ig-ghost' : 'btn-ig'"
+            :disabled="isPending"
+            @click.stop="emit('toggle-follow', user)"
+        >
+            {{ isFollowing ? 'Seguindo' : 'Seguir' }}
+        </button>
     </div>
 </template>
 
 <style scoped>
-.cursor-pointer {
-    cursor: pointer;
-    transition: opacity 0.2s ease-in-out;
-}
-
-.cursor-pointer:hover {
-    opacity: 0.85;
-}
-
-.account-card-compact.cursor-pointer:hover {
-    opacity: 0.92;
-}
-
 .account-card {
-    background-color: var(--bg-secondary);
-    border-color: var(--border) !important;
+    background-color: var(--bg-main);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
 }
 
-.card-title {
+.account-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.account-name {
     color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.account-username {
+    font-size: 0.875rem;
+}
+
+.compact {
+    padding: 8px 16px;
 }
 </style>

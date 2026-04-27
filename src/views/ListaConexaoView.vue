@@ -1,56 +1,42 @@
 <template>
-  <div class="container py-4" style="max-width: 600px; margin: 0 auto;">
-    <div class="d-flex align-items-center mb-4">
-      <button class="btn btn-link text-body p-0 me-3 nav-back-btn" @click="goBack">
+  <div class="connections-view mx-auto">
+    <div class="connections-header d-flex align-items-center mb-3 border-bottom py-2">
+      <button class="nav-back-btn p-2" @click="goBack">
         <i class="bi bi-arrow-left fs-4"></i>
       </button>
-      <h3 class="mb-0">{{ title }}</h3>
+      <h3 class="connections-title flex-grow-1 text-center mb-0 pe-5">{{ title }}</h3>
     </div>
 
     <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
+      <div class="spinner-border" style="color: var(--accent);" role="status">
         <span class="visually-hidden">Carregando...</span>
       </div>
     </div>
     
-    <div v-else-if="error" class="alert alert-danger">
+    <div v-else-if="error" class="error-msg mb-3">
       {{ error }}
     </div>
 
     <div v-else>
-      <div v-if="users.length === 0" class="text-center py-5 text-muted">
-        Nenhum usuário encontrado.
-      </div>
-      
-      <div class="d-flex flex-column gap-3 mb-4">
-        <div v-for="user in users" :key="user.id">
-          <AccountCard
-            :user="user"
-            compact
-            :is-following="followsStore.followingIds.has(user.id)"
-            :is-pending="followsStore.pendingIds.has(user.id)"
-            :show-follow-button="authStore.user?.id !== user.id"
-            @click="goToProfile(user.username)"
-            @toggle-follow="followsStore.toggleFollow(user.id)"
-          />
-        </div>
+      <div class="connections-list mb-4">
+        <AccountCard
+          v-for="user in users"
+          :key="user.id"
+          :user="user"
+          compact
+          :is-following="followsStore.followingIds.has(user.id)"
+          :is-pending="followsStore.pendingIds.has(user.id)"
+          :show-follow-button="authStore.user?.id !== user.id"
+          @click="goToProfile(user.username)"
+          @toggle-follow="followsStore.toggleFollow(user.id)"
+        />
       </div>
       
       <!-- Paginação -->
-      <div v-if="lastPage > 1" class="d-flex justify-content-center mt-4">
-        <nav>
-          <ul class="pagination">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-              <button class="page-link" @click="fetchData(currentPage - 1)">Anterior</button>
-            </li>
-            <li class="page-item disabled">
-              <span class="page-link">{{ currentPage }} de {{ lastPage }}</span>
-            </li>
-            <li class="page-item" :class="{ disabled: currentPage === lastPage }">
-              <button class="page-link" @click="fetchData(currentPage + 1)">Próxima</button>
-            </li>
-          </ul>
-        </nav>
+      <div v-if="lastPage > 1" class="ig-pagination mt-4">
+        <button :disabled="currentPage === 1" @click="fetchData(currentPage - 1)">Anterior</button>
+        <span>{{ currentPage }} de {{ lastPage }}</span>
+        <button :disabled="currentPage === lastPage" @click="fetchData(currentPage + 1)">Próxima</button>
       </div>
     </div>
   </div>
@@ -175,11 +161,35 @@ watch(() => route.query.user, () => {
 </script>
 
 <style scoped>
-.cursor-pointer {
+.connections-view {
+  max-width: 600px;
+  background-color: var(--bg-main);
+  min-height: 80vh;
+}
+
+.connections-header {
+  border-color: var(--border) !important;
+}
+
+.connections-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.nav-back-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .nav-back-btn:hover {
   opacity: 0.7;
+}
+
+.connections-list {
+  display: flex;
+  flex-column: column;
+  flex-direction: column;
 }
 </style>

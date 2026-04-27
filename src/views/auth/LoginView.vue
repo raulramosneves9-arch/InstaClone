@@ -28,34 +28,62 @@ async function handleSubmit() {
 </script>
 
 <template>
-    <div class="card p-4 shadow-sm border">
-        <h1 class="text-center mb-4 logo-font" style="font-family: 'Style Script', cursive; font-size: 3rem;">
+    <div class="auth-box p-4 border mx-auto">
+        <h1 class="text-center mb-5 logo-font">
             InstaClone
         </h1>
 
         <form @submit.prevent="handleSubmit">
             <div class="mb-2">
-                <input v-model="email" type="email" class="form-control bg-light" placeholder="E-mail" required />
+                <input v-model="email" type="email" class="ig-input" placeholder="E-mail" required />
             </div>
             <div class="mb-3">
-                <input v-model="password" type="password" class="form-control bg-light" placeholder="Senha" required />
+                <input v-model="password" type="password" class="ig-input" placeholder="Senha" required />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 fw-bold" :disabled="loading">
-                <Spinner v-if="loading" />
+            <button type="submit" class="btn-ig w-100" :disabled="loading">
+                <span v-if="loading" class="spinner-border spinner-border-sm" role="status"></span>
                 <span v-else>Entrar</span>
             </button>
 
-            <div v-if="errorMsg" class="alert alert-danger mt-3 py-2 small text-center">
+            <div v-if="errorMsg" class="error-msg mt-3 text-center">
                 {{ errorMsg }}
             </div>
         </form>
+    </div>
 
-        <div class="text-center mt-4 pt-3 border-top">
-            <p class="mb-0 small">
-                Não tem uma conta?
-                <router-link to="/cadastro" class="text-primary fw-bold text-decoration-none">Cadastre-se</router-link>
-            </p>
-        </div>
+    <div class="auth-box p-4 border mx-auto mt-3 text-center">
+        <p class="mb-0 small">
+            Não tem uma conta?
+            <router-link to="/cadastro" class="text-primary fw-bold text-decoration-none">Cadastre-se</router-link>
+        </p>
     </div>
 </template>
+
+<style scoped>
+.auth-box {
+    max-width: 350px;
+    background-color: var(--bg-main);
+}
+
+.logo-font {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.ig-input {
+    width: 100%;
+    padding: 9px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+}
+
+.ig-input:focus {
+    border-color: var(--text-secondary);
+    outline: none;
+}
+</style>

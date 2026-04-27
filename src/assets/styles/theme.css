@@ -154,3 +154,155 @@ hr {
     background-color: var(--bg-main);
     color: var(--text-secondary);
 }
+
+/* ──────────────────────────────────────────────
+   Custom Instagram-like buttons (sem Bootstrap)
+   ────────────────────────────────────────────── */
+.btn-ig {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    border: none;
+    background-color: var(--accent);
+    color: #fff;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-ig:hover:not(:disabled) {
+    opacity: 0.85;
+    color: #fff;
+}
+
+.btn-ig:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-ig-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease, opacity 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-ig-ghost:hover:not(:disabled) {
+    border-color: var(--text-primary);
+}
+
+.btn-ig-ghost:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-ig-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    gap: 5px;
+}
+
+.btn-ig-danger:hover:not(:disabled) {
+    background-color: rgba(237, 73, 86, 0.1);
+}
+
+.btn-ig-danger:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-ig-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.btn-ig-text:hover:not(:disabled) {
+    color: var(--text-primary);
+}
+
+.btn-ig-text:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ──────────────────────────────────────────────
+   Custom error / alert display
+   ────────────────────────────────────────────── */
+.error-msg {
+    background-color: rgba(237, 73, 86, 0.1);
+    border: 1px solid rgba(237, 73, 86, 0.35);
+    border-radius: var(--radius-sm);
+    color: var(--danger);
+    padding: 12px 16px;
+    font-size: 0.875rem;
+}
+
+/* ──────────────────────────────────────────────
+   Custom pagination (sem Bootstrap .pagination)
+   ────────────────────────────────────────────── */
+.ig-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.ig-pagination button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.ig-pagination button:hover:not(:disabled) {
+    border-color: var(--text-primary);
+}
+
+.ig-pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ig-pagination span {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}

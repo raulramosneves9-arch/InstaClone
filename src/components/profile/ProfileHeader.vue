@@ -1,19 +1,23 @@
 <template>
-  <div class="profile-header d-flex align-items-center mb-4">
-    <img :src="profile.avatar || 'https://via.placeholder.com/100'" class="rounded-circle me-4 object-fit-cover border" width="100" height="100" alt="Avatar">
+  <div class="profile-header d-flex flex-column flex-md-row align-items-center mb-5">
+    <div class="profile-avatar-wrapper me-md-5 mb-4 mb-md-0">
+      <img :src="profile.avatar || 'https://via.placeholder.com/150'" class="profile-avatar rounded-circle border" alt="Avatar">
+    </div>
 
     <div class="flex-grow-1">
-      <div class="d-flex align-items-center mb-2">
-        <h4 class="mb-0 me-3 fw-semibold">{{ profile.username }}</h4>
+      <div class="d-flex flex-wrap align-items-center mb-3">
+        <h2 class="profile-username mb-0 me-3">{{ profile.username }}</h2>
 
-        <template v-if="isOwnProfile">
-          <router-link to="/profile/edit" class="btn btn-outline-secondary btn-sm">Editar perfil</router-link>
-        </template>
-        <template v-else>
-          <button class="btn btn-sm" :class="isFollowing ? 'btn-secondary' : 'btn-primary'" @click="$emit('toggle-follow')" :disabled="loadingFollow">
-            {{ isFollowing ? 'Seguindo' : 'Seguir' }}
-          </button>
-        </template>
+        <div class="header-actions">
+          <template v-if="isOwnProfile">
+            <router-link to="/profile/edit" class="btn-ig-ghost btn-sm">Editar perfil</router-link>
+          </template>
+          <template v-else>
+            <button class="btn-sm" :class="isFollowing ? 'btn-ig-ghost' : 'btn-ig'" @click="$emit('toggle-follow')" :disabled="loadingFollow">
+              {{ isFollowing ? 'Seguindo' : 'Seguir' }}
+            </button>
+          </template>
+        </div>
       </div>
 
       <ProfileSummaryCards
@@ -24,7 +28,7 @@
         :following-link="followingLink"
       />
 
-      <div v-if="profile.name" class="fw-semibold">{{ profile.name }}</div>
+      <div v-if="profile.name" class="fw-bold mb-1">{{ profile.name }}</div>
       <div v-if="profile.bio" class="profile-bio">{{ profile.bio }}</div>
     </div>
   </div>
@@ -77,11 +81,40 @@ defineEmits(['toggle-follow']);
 
 <style scoped>
 .profile-header {
+  padding: 0 16px;
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+
+.profile-username {
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.header-actions {
+  display: flex;
   gap: 8px;
 }
 
 .profile-bio {
   white-space: pre-wrap;
   color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 767px) {
+  .profile-avatar {
+    width: 77px;
+    height: 77px;
+  }
+  
+  .profile-username {
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
 }
 </style>

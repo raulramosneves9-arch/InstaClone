@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
+import { resolveImageUrl } from '../utils/imageUrl';
 import Avatar from '../components/ui/Avatar.vue';
 import PostCommentList from '../components/post/PostCommentList.vue';
 import PostCommentForm from '../components/post/PostCommentForm.vue';
@@ -65,12 +66,6 @@ const loadMoreComments = () => {
     }
 };
 
-const formatImageUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/500x500?text=Sem+Imagem';
-    if (url.startsWith('http')) return url;
-    const cleanPath = url.replace('public/', '');
-    return `http://localhost:8000/storage/${cleanPath}`;
-};
 
 const handleLike = async () => {
     if (!post.value) return;
@@ -144,70 +139,80 @@ onMounted(() => {
 <template>
     <div class="container py-4">
         <div v-if="isLoadingPost" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
+            <div class="spinner-border" style="color: var(--accent);" role="status">
                 <span class="visually-hidden">Carregando...</span>
             </div>
         </div>
 
-        <div v-else-if="post" class="card border mx-auto post-details-card">
-            <div class="card-header d-flex justify-content-between align-items-center py-3">
-                <router-link :to="`/profile?user=${post.user?.username}`" class="d-flex align-items-center text-decoration-none">
-                    <Avatar :src="post.user?.avatar_url" :size="40" />
-                    <span class="ms-2 fw-semibold">{{ post.user?.username }}</span>
-                </router-link>
-                
-                <button v-if="currentUser?.id === post.user?.id" 
-                    @click="deletePost" 
-                    class="btn btn-sm btn-outline-danger" 
-                    :disabled="isDeletingPost">
-                    <i class="bi bi-trash"></i> Apagar
-                </button>
-            </div>
-
-            <div class="post-image-container d-flex justify-content-center align-items-center" @dblclick="handleLike">
-                <img :src="formatImageUrl(post.image_url || post.image)" class="img-fluid post-image" :alt="post.caption">
-            </div>
-
-            <div class="card-body">
-                <div class="d-flex gap-3 mb-3">
-                    <i @click="handleLike" class="bi fs-3 cursor-pointer action-icon"
-                        :class="[post.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart']"></i>
-                    <i class="bi bi-chat fs-3 action-icon"></i>
-                    <i class="bi bi-send fs-3 action-icon"></i>
+        <div v-else-if="post" class="post-details-container mx-auto">
+            <div class="post-image-side">
+                <div class="post-image-wrapper" @dblclick="handleLike">
+                    <img :src="resolveImageUrl(post.image_url || post.image)" class="post-image" :alt="post.caption">
                 </div>
+            </div>
 
-                <div class="fw-bold mb-2">{{ post.likes_count || 0 }} curtidas</div>
-
-                <div class="mb-3">
-                    <router-link :to="`/profile?user=${post.user?.username}`" class="fw-semibold text-decoration-none me-2">
-                        {{ post.user?.username }}
+            <div class="post-info-side">
+                <div class="post-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <router-link :to="`/profile?user=${post.user?.username}`" class="d-flex align-items-center text-decoration-none">
+                        <Avatar :src="post.user?.avatar_url" :size="32" />
+                        <span class="ms-2 fw-semibold">{{ post.user?.username }}</span>
                     </router-link>
-                    <span>{{ post.caption }}</span>
-                </div>
-                
-                <div class="text-muted small mb-4 border-bottom pb-3">
-                    {{ post.comments_count || 0 }} comentários
-                </div>
-
-                <div class="comments-section mb-3">
-                    <PostCommentList
-                        :comments="comments"
-                        :current-user-id="currentUser?.id"
-                        @delete-comment="deleteComment"
-                    />
-
-                    <button v-if="commentsPage < commentsLastPage" 
-                        @click="loadMoreComments" 
-                        class="btn btn-sm btn-link text-muted p-0 text-decoration-none mt-2"
-                        :disabled="isLoadingComments">
-                        <span v-if="isLoadingComments" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                        Carregar mais comentários
+                    
+                    <button v-if="currentUser?.id === post.user?.id" 
+                        @click="deletePost" 
+                        class="btn-ig-danger" 
+                        :disabled="isDeletingPost">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </div>
-            </div>
 
-            <div class="card-footer p-0">
-                <PostCommentForm v-model="newComment" @submit="submitComment" />
+                <div class="post-scrollable-content p-3">
+                    <div class="post-caption-section mb-4">
+                        <div class="d-flex gap-2">
+                            <Avatar :src="post.user?.avatar_url" :size="32" />
+                            <div>
+                                <router-link :to="`/profile?user=${post.user?.username}`" class="fw-semibold text-decoration-none me-2">
+                                    {{ post.user?.username }}
+                                </router-link>
+                                <span>{{ post.caption }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comments-section">
+                        <PostCommentList
+                            :comments="comments"
+                            :current-user-id="currentUser?.id"
+                            @delete-comment="deleteComment"
+                        />
+
+                        <button v-if="commentsPage < commentsLastPage" 
+                            @click="loadMoreComments" 
+                            class="btn-ig-text mt-2"
+                            :disabled="isLoadingComments">
+                            <span v-if="isLoadingComments" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Carregar mais comentários
+                        </button>
+                    </div>
+                </div>
+
+                <div class="post-actions-section p-3 border-top">
+                    <div class="d-flex gap-3 mb-2">
+                        <i @click="handleLike" class="bi fs-4 cursor-pointer action-icon"
+                            :class="[post.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart']"></i>
+                        <i class="bi bi-chat fs-4 action-icon"></i>
+                        <i class="bi bi-send fs-4 action-icon"></i>
+                    </div>
+
+                    <div class="fw-bold mb-1">{{ post.likes_count || 0 }} curtidas</div>
+                    <div class="text-muted x-small text-uppercase">
+                        {{ post.comments_count || 0 }} comentários
+                    </div>
+                </div>
+
+                <div class="post-comment-input border-top">
+                    <PostCommentForm v-model="newComment" @submit="submitComment" />
+                </div>
             </div>
         </div>
 
@@ -219,22 +224,56 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.post-details-card {
-    max-width: 600px;
+.post-details-container {
+    max-width: 935px;
+    display: flex;
+    flex-direction: column;
     background-color: var(--bg-main);
-    border-color: var(--border) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 450px;
 }
 
-.post-image-container {
-    background-color: var(--bg-main);
-    min-height: 300px;
-    max-height: 600px;
-    overflow: hidden;
+@media (min-width: 768px) {
+    .post-details-container {
+        flex-direction: row;
+    }
+    
+    .post-image-side {
+        flex: 1 1 60%;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid var(--border);
+    }
+    
+    .post-info-side {
+        flex: 0 0 40%;
+        display: flex;
+        flex-direction: column;
+        max-width: 400px;
+    }
+}
+
+.post-image-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .post-image {
-    max-height: 600px;
+    max-width: 100%;
+    max-height: 80vh;
     object-fit: contain;
+}
+
+.post-scrollable-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 400px;
 }
 
 .cursor-pointer {
@@ -242,7 +281,7 @@ onMounted(() => {
 }
 
 .action-icon {
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .action-icon:hover {
@@ -251,10 +290,9 @@ onMounted(() => {
 
 .bi-heart-fill {
     color: var(--danger) !important;
-    transform: scale(1.2);
 }
 
-.form-control:focus {
-    box-shadow: none;
+.x-small {
+    font-size: 0.75rem;
 }
 </style>

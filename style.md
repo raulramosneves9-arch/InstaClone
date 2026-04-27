@@ -1,123 +1,135 @@
-Instagram Dark UI (Rework Visual)
-📌 Objetivo
+📋 tasks.md — INSTACLONE (VUE 3 + BOOTSTRAP CONTROLADO)
+⚙️ REGRA GLOBAL (CRÍTICA)
+## 🚫 Bootstrap NÃO pode dominar o visual
 
-Recriar o visual do sistema para ficar o mais próximo possível da interface do Instagram (modo dark).
+Usar Bootstrap APENAS para:
+- layout (container, row, col)
+- flex (d-flex, align-items, justify-content)
+- espaçamento (gap, p-*, m-*)
 
-⚠️ Importante:
+NÃO usar:
+- .card
+- .btn padrão
+- .bg-primary / cores Bootstrap
+- sombras padrão
 
-O projeto já está funcional
-O foco é 100% visual (UI/UX)
-NÃO alterar lógica, apenas estrutura visual e classes
-🎨 Diretrizes Visuais
-🌑 Cores (obrigatório seguir)
---bg-main: #000000;
---bg-secondary: #121212;
---border: #262626;
+TODO estilo visual deve ser custom (Instagram-like)
+🧠 🔖 GLOBAL — ARQUIVOS QUE NECESSITAM AJUSTE VISUAL
+## 🎨 Visual Refactor Pending (Views)
 
---text-primary: #f5f5f5;
---text-secondary: #a8a8a8;
+- [x] FeedView.vue
+- [x] PostDetailsView.vue
+- [x] PerfilView.vue
+- [x] ListaConexaoView.vue
+- [x] NotFoundView.vue
 
---accent: #0095f6;
+## 🔐 Auth (baixa prioridade)
 
-❌ Não usar:
+- [x] LoginView.vue
+- [x] CadastroView.vue
+- [x] CriarPostView.vue
+- [x] EditarPerfilView.vue
+- [x] DescobrirView.vue (Refatorado como Sugestões)
+🧩 DETALHAMENTO (COM BOOTSTRAP CONTROLADO)
+🎯 FeedView.vue (CRÍTICO)
+Status: completed
 
-Preto absoluto em tudo sem variação
-Cinzas aleatórios
-Sombras pesadas
-🔤 Tipografia
+Usar Bootstrap:
+- container
+- d-flex
+- justify-content-center
 
-Usar:
+NÃO usar:
+- card
 
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+Ajustes:
+- [x] max-width: 470px
+- [x] centralização perfeita
+- [x] fundo preto (#000)
+- [x] espaçamento entre posts (16px) (via PostCard mb-3)
+🎯 PostDetailsView.vue
+Status: completed
 
-Hierarquia:
+Usar Bootstrap:
+- grid (row/col)
 
-Username: font-weight: 600
-Texto normal: 400
-Texto secundário: cor cinza + menor destaque
-🧱 Layout
-Estrutura obrigatória:
-[ Sidebar ] [ Feed ] [ Sugestões ]
-Regras:
-Feed centralizado
-Largura máxima do feed: 470px – 600px
-Sidebar fixa (desktop)
-Mobile: apenas feed
-🧾 Post (Elemento principal)
+Ajustes:
+- [x] layout dividido (imagem + comentários)
+- [x] sem card Bootstrap
+- [x] borda: 1px solid #262626
+🎯 PerfilView.vue
+Status: completed
 
-Cada post DEVE conter:
+Usar Bootstrap:
+- grid
 
-Header (avatar + username)
-Imagem
-Ações (like, comentar, compartilhar, salvar)
-Likes
-Descrição
-Comentários
-Estilo:
-Fundo: preto (#000)
-Borda: 1px sólida (#262626)
-Sem sombra
-Espaçamento interno consistente
-🧩 Ícones
+Ajustes:
+- [x] header alinhado (avatar + info)
+- [x] grid de posts
+- [x] botões SEM .btn padrão
+🎯 ListaConexaoView.vue
+Status: completed
 
-Usar ícones estilo outline (ex: Lucide)
+Usar Bootstrap:
+- d-flex
+- gap
 
-Estados:
+Ajustes:
+- [x] lista limpa estilo seguidores
+- [x] avatar + nome + botão
+🎯 NotFoundView.vue
+Status: completed
 
-Normal: branco
-Ativo (like): vermelho
-Hover: leve opacidade
-✨ Microinterações
+Ajustes:
+- [x] centralização total
+- [x] sem Bootstrap visual
+🔐 AUTH (COM BOOTSTRAP CONTROLADO)
+🎯 LoginView.vue
+Status: completed
 
-Obrigatório implementar:
+Usar Bootstrap:
+- container
+- d-flex
 
-Like:
-Escala ao clicar
-transform: scale(1.2);
-transition: 0.2s;
-Hover:
-opacity: 0.7;
-transition: 0.2s;
-📏 Espaçamento
+NÃO usar:
+- .card
+- .btn-primary
 
-Sistema fixo:
+Ajustes:
+- [x] inputs estilo Instagram
+- [x] botão custom
+- [x] fundo escuro
+🎯 CadastroView.vue
+Status: completed
 
-4px / 8px / 12px / 16px / 24px / 32px
+Ajustes:
+- [x] igual LoginView
+Status: completed
 
-❌ Não usar valores aleatórios tipo 13px, 22px, etc.
+Ajustes:
+- [x] layout limpo
+- [x] inputs minimalistas
+🎯 EditarPerfilView.vue
+Status: completed
 
-🚫 O que NÃO fazer
-NÃO usar estilo padrão do Bootstrap
-NÃO usar bordas arredondadas exageradas
-NÃO usar cores fora da paleta
-NÃO adicionar sombras pesadas
-NÃO poluir a interface
-🖼️ Referência Visual
+Ajustes:
+- [x] formulário consistente com perfil
+🎯 DescobrirView.vue
+Status: completed
 
-Use como base:
+Ajustes:
+- [x] tipografia
+- [x] alinhamento
+🚀 ORDEM DE EXECUÇÃO (ATUALIZADA)
+1. Sidebar (layout global)
+2. FeedView.vue
+3. PostCard.vue (componente)
+4. PerfilView.vue
+5. PostDetailsView.vue
+6. Auth (por último)
+💡 DICA DIRETA (ESSA AQUI É OURO)
 
-Feed do Instagram
-Espaçamento minimalista
-Interface limpa e centrada
+Bootstrap é só o esqueleto
+Instagram é o acabamento
 
-Sugestões de busca para referência:
-
-"Instagram dark UI feed"
-"Instagram desktop layout dark"
-"Instagram post UI breakdown"
-🧠 Comportamento esperado da IA
-
-A IA deve:
-
-Ajustar componentes para parecerem posts reais
-Ajustar aparência padrão do Bootstrap PARA ficar mais proximo ao instagram
-Melhorar alinhamento e espaçamento
-Aplicar consistência visual global
-🧪 Resultado esperado
-
-O sistema deve parecer:
-
-✔ Profissional
-✔ Minimalista
-✔ Idêntico ao Instagram
-✔ Sem aparência de template pronto
+👉 Se você usar .card, .btn, etc → já perdeu o visual.

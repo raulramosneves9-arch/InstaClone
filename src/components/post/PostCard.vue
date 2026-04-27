@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useFeedStore } from '../../stores/feed';
 import Avatar from '../ui/Avatar.vue';
+import { timeAgo } from '../../utils/dates';
 
 const props = defineProps({
     post: { type: Object, required: true }
@@ -34,10 +35,10 @@ const formatImageUrl = (url) => {
 </script>
 
 <template>
-    <div class="card mb-4 border shadow-sm mx-auto post-card">
-        <div class="card-header bg-white d-flex align-items-center border-0 py-2">
+    <div class="card mb-4 border mx-auto post-card">
+        <div class="card-header d-flex align-items-center border-0 py-2">
             <Avatar :src="post.user?.avatar_url" :size="32" />
-            <span class="ms-2 fw-bold small">{{ post.user?.username || 'Usuário' }}</span>
+            <span class="ms-2 fw-semibold small username">{{ post.user?.username || 'Usuário' }}</span>
         </div>
 
         <div class="post-image-bg" @dblclick="handleLike">
@@ -47,27 +48,32 @@ const formatImageUrl = (url) => {
 
         <div class="card-body p-3">
             <div class="d-flex gap-3 mb-2">
-                <i @click="handleLike" class="bi fs-4 cursor-pointer"
+                <i @click="handleLike" class="bi fs-4 cursor-pointer action-icon"
                     :class="[post.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart']"></i>
-                <i class="bi bi-chat fs-4"></i>
+                <i class="bi bi-chat fs-4 action-icon"></i>
+                <i class="bi bi-send fs-4 action-icon"></i>
+                <i class="bi bi-bookmark ms-auto fs-5 action-icon"></i>
             </div>
 
-            <p class="fw-bold small mb-1">{{ post.likes_count || 0 }} curtidas</p>
+            <p class="fw-semibold small mb-1 username">{{ post.likes_count || 0 }} curtidas</p>
 
             <p class="mb-2 small">
-                <span class="fw-bold me-2">{{ post.user?.username }}</span>
+                <span class="fw-semibold me-2 username">{{ post.user?.username }}</span>
                 {{ post.caption }}
+            </p>
+            <p v-if="post.created_at" class="text-muted x-small mb-2 text-uppercase">
+                {{ timeAgo(post.created_at) }}
             </p>
 
             <div v-if="post.comments?.length > 0" class="mt-2 border-top pt-2">
                 <div v-for="comment in post.comments" :key="comment.id" class="small mb-1">
                     <span class="fw-bold me-2">{{ comment.user?.username }}</span>
-                    <span>{{ comment.content }}</span>
+                    <span>{{ comment.content || comment.body }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="card-footer bg-white border-top-0 p-0">
+        <div class="card-footer border-top-0 p-0">
             <form @submit.prevent="submitComment" class="d-flex align-items-center px-3 py-2 border-top">
                 <input v-model="commentContent" type="text"
                     class="form-control form-control-sm border-0 shadow-none ps-0"
@@ -83,11 +89,14 @@ const formatImageUrl = (url) => {
 
 <style scoped>
 .post-card {
-    max-width: 470px;
+    max-width: 600px;
+    background-color: var(--bg-main);
+    border-color: var(--border) !important;
+    border-radius: var(--radius-sm);
 }
 
 .post-image-bg {
-    background-color: #fafafa;
+    background-color: var(--bg-main);
     min-height: 300px;
     display: flex;
     align-items: center;
@@ -96,6 +105,28 @@ const formatImageUrl = (url) => {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.action-icon {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.action-icon:hover {
+    opacity: 0.7;
+}
+
+.bi-heart-fill {
+    color: var(--danger) !important;
+    transform: scale(1.2);
+}
+
+.username {
+    font-weight: 600;
+}
+
+.x-small {
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
 }
 
 .form-control:focus {

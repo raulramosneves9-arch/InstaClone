@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar.vue';
     <div class="app-layout">
         <Navbar />
         <main class="main-content">
-            <div class="container py-4">
+            <div class="app-content-wrapper py-4">
                 <slot />
             </div>
         </main>
@@ -14,15 +14,36 @@ import Navbar from '../components/Navbar.vue';
 </template>
 
 <style scoped>
-/* Padding para mobile (navbar embaixo) e margem para desktop (sidebar lado) */
+.app-layout {
+    min-height: 100vh;
+    background-color: var(--bg-main);
+}
+
 .main-content {
+    min-height: 100vh;
     padding-bottom: 60px;
+}
+
+.app-content-wrapper {
+    width: min(100%, 1100px);
+    margin: 0 auto;
+    padding: 0 16px;
 }
 
 @media (min-width: 768px) {
     .main-content {
         padding-bottom: 0;
-        margin-left: 245px;
+        margin-left: 244px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .app-content-wrapper {
+        display: grid;
+        grid-template-columns: minmax(470px, 600px) minmax(260px, 320px);
+        column-gap: 32px;
+        align-items: start;
+        justify-content: center;
     }
 }
 </style>

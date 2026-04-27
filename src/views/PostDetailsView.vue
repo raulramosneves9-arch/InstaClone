@@ -2,14 +2,14 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { useFeedStore } from '../stores/feed';
 import api from '../services/api';
 import Avatar from '../components/ui/Avatar.vue';
+import PostCommentList from '../components/post/PostCommentList.vue';
+import PostCommentForm from '../components/post/PostCommentForm.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const feedStore = useFeedStore();
 
 const postId = route.params.postId;
 
@@ -96,7 +96,7 @@ const submitComment = async () => {
     if (!newComment.value.trim()) return;
 
     try {
-        const { data } = await api.post(`/posts/${postId}/comments`, { content: newComment.value });
+        const { data } = await api.post(`/posts/${postId}/comments`, { body: newComment.value });
         const commentData = data.data || data;
         
         comments.value.unshift(commentData); // adiciona no início
@@ -149,11 +149,11 @@ onMounted(() => {
             </div>
         </div>
 
-        <div v-else-if="post" class="card shadow-sm border mx-auto post-details-card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                <router-link :to="`/perfil?user=${post.user?.username}`" class="d-flex align-items-center text-decoration-none text-dark">
+        <div v-else-if="post" class="card border mx-auto post-details-card">
+            <div class="card-header d-flex justify-content-between align-items-center py-3">
+                <router-link :to="`/profile?user=${post.user?.username}`" class="d-flex align-items-center text-decoration-none">
                     <Avatar :src="post.user?.avatar_url" :size="40" />
-                    <span class="ms-2 fw-bold">{{ post.user?.username }}</span>
+                    <span class="ms-2 fw-semibold">{{ post.user?.username }}</span>
                 </router-link>
                 
                 <button v-if="currentUser?.id === post.user?.id" 
@@ -164,21 +164,22 @@ onMounted(() => {
                 </button>
             </div>
 
-            <div class="post-image-container bg-light d-flex justify-content-center align-items-center" @dblclick="handleLike">
+            <div class="post-image-container d-flex justify-content-center align-items-center" @dblclick="handleLike">
                 <img :src="formatImageUrl(post.image_url || post.image)" class="img-fluid post-image" :alt="post.caption">
             </div>
 
             <div class="card-body">
                 <div class="d-flex gap-3 mb-3">
-                    <i @click="handleLike" class="bi fs-3 cursor-pointer"
+                    <i @click="handleLike" class="bi fs-3 cursor-pointer action-icon"
                         :class="[post.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart']"></i>
-                    <i class="bi bi-chat fs-3"></i>
+                    <i class="bi bi-chat fs-3 action-icon"></i>
+                    <i class="bi bi-send fs-3 action-icon"></i>
                 </div>
 
                 <div class="fw-bold mb-2">{{ post.likes_count || 0 }} curtidas</div>
 
                 <div class="mb-3">
-                    <router-link :to="`/perfil?user=${post.user?.username}`" class="fw-bold text-dark text-decoration-none me-2">
+                    <router-link :to="`/profile?user=${post.user?.username}`" class="fw-semibold text-decoration-none me-2">
                         {{ post.user?.username }}
                     </router-link>
                     <span>{{ post.caption }}</span>
@@ -189,19 +190,11 @@ onMounted(() => {
                 </div>
 
                 <div class="comments-section mb-3">
-                    <div v-for="(comment, index) in comments" :key="comment.id" class="d-flex justify-content-between mb-2">
-                        <div>
-                            <router-link :to="`/perfil?user=${comment.user?.username}`" class="fw-bold text-dark text-decoration-none me-2 small">
-                                {{ comment.user?.username }}
-                            </router-link>
-                            <span class="small">{{ comment.content }}</span>
-                        </div>
-                        <button v-if="currentUser?.id === comment.user?.id" 
-                            @click="deleteComment(comment.id, index)" 
-                            class="btn btn-link text-danger p-0 border-0 btn-sm text-decoration-none ms-2">
-                            <i class="bi bi-x"></i>
-                        </button>
-                    </div>
+                    <PostCommentList
+                        :comments="comments"
+                        :current-user-id="currentUser?.id"
+                        @delete-comment="deleteComment"
+                    />
 
                     <button v-if="commentsPage < commentsLastPage" 
                         @click="loadMoreComments" 
@@ -213,16 +206,8 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="card-footer bg-white p-0">
-                <form @submit.prevent="submitComment" class="d-flex align-items-center p-3">
-                    <input v-model="newComment" type="text"
-                        class="form-control border-0 shadow-none ps-0"
-                        placeholder="Adicione um comentário...">
-                    <button type="submit" class="btn btn-link text-primary fw-bold text-decoration-none px-2"
-                        :disabled="!newComment.trim()">
-                        Publicar
-                    </button>
-                </form>
+            <div class="card-footer p-0">
+                <PostCommentForm v-model="newComment" @submit="submitComment" />
             </div>
         </div>
 
@@ -236,9 +221,12 @@ onMounted(() => {
 <style scoped>
 .post-details-card {
     max-width: 600px;
+    background-color: var(--bg-main);
+    border-color: var(--border) !important;
 }
 
 .post-image-container {
+    background-color: var(--bg-main);
     min-height: 300px;
     max-height: 600px;
     overflow: hidden;
@@ -251,6 +239,19 @@ onMounted(() => {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.action-icon {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.action-icon:hover {
+    opacity: 0.7;
+}
+
+.bi-heart-fill {
+    color: var(--danger) !important;
+    transform: scale(1.2);
 }
 
 .form-control:focus {

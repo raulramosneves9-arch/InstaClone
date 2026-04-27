@@ -14,9 +14,8 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="feed-view container py-4">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
+    <div class="feed-view">
+        <div class="feed-main">
 
                 <div v-if="feedStore.isLoading" class="d-flex justify-content-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -28,9 +27,9 @@ onMounted(async () => {
                     <div v-if="feedStore.feedPosts.length > 0">
                         <PostCard v-for="post in feedStore.feedPosts" :key="post.id" :post="post" />
                         <div v-if="feedStore.nextCursor" class="text-center py-4">
-                            <button 
-                                class="btn btn-outline-primary" 
-                                :disabled="feedStore.isFetchingMore" 
+                            <button
+                                class="btn btn-outline-primary load-more-btn"
+                                :disabled="feedStore.isFetchingMore"
                                 @click="feedStore.loadMoreFeed()"
                             >
                                 <span v-if="feedStore.isFetchingMore" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -39,24 +38,64 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <div v-else class="text-center py-5 bg-white border rounded">
+                    <div v-else class="text-center py-5 empty-state border rounded">
                         <i class="bi bi-camera fs-1 text-muted"></i>
                         <h4 class="mt-3">Nenhuma publicação ainda</h4>
                         <p class="text-muted">Siga pessoas ou crie seu primeiro post!</p>
-                        <router-link to="/criar" class="btn btn-primary btn-sm mt-2">
+                        <router-link to="/create" class="btn btn-primary btn-sm mt-2">
                             Criar minha primeira publicação
                         </router-link>
                     </div>
                 </template>
 
-            </div>
         </div>
+        <aside class="feed-suggestions d-none d-xl-block">
+            <div class="suggestions-card">
+                <h6 class="mb-2">Sugestoes</h6>
+                <p class="text-muted mb-0">Use a aba Buscar para encontrar novas pessoas para seguir.</p>
+            </div>
+        </aside>
     </div>
 </template>
 
 <style scoped>
 .feed-view {
-    max-width: 100%;
-    overflow-x: hidden;
+    display: block;
+}
+
+.feed-main {
+    max-width: 600px;
+    width: 100%;
+}
+
+.empty-state {
+    background-color: var(--bg-secondary);
+    border-color: var(--border) !important;
+}
+
+.load-more-btn {
+    min-width: 152px;
+}
+
+.feed-suggestions {
+    width: 300px;
+    position: sticky;
+    top: 24px;
+}
+
+.suggestions-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+}
+
+@media (min-width: 1200px) {
+    .feed-view {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 32px;
+    }
 }
 </style>

@@ -1,18 +1,20 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { ROUTE_NAMES } from '../router/routeNames';
+import AppIcon from './ui/AppIcon.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
-const handleLogout = () => {
-    authStore.logout();
+const handleLogout = async () => {
+    await authStore.logout();
     router.push('/login');
 };
 </script>
 
 <template>
-    <nav class="nav-container border-end bg-white">
+    <nav class="nav-container border-end">
         <div class="d-flex flex-column h-100 p-3">
 
             <router-link to="/feed" class="navbar-brand mb-5 d-none d-md-block">
@@ -21,33 +23,42 @@ const handleLogout = () => {
 
             <ul class="nav nav-pills flex-column mb-auto gap-2">
                 <li class="nav-item">
-                    <router-link to="/feed" class="nav-link d-flex align-items-center gap-3 text-dark">
-                        <i class="bi bi-house-door fs-4"></i>
-                        <span class="d-none d-xl-block">Página inicial</span>
+                    <router-link :to="{ name: ROUTE_NAMES.FEED }" custom v-slot="{ href, navigate, isActive }">
+                        <a :href="href" @click="navigate" class="nav-link d-flex align-items-center gap-3">
+                            <AppIcon name="home" :filled="isActive" />
+                            <span class="d-none d-xl-block">Home</span>
+                        </a>
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link to="/criar" class="nav-link d-flex align-items-center gap-3 text-dark">
-                        <i class="bi bi-plus-square fs-4"></i>
-                        <span class="d-none d-xl-block">Criar</span>
+                    <router-link :to="{ name: ROUTE_NAMES.DESCOBRIR }" custom v-slot="{ href, navigate, isActive }">
+                        <a :href="href" @click="navigate" class="nav-link d-flex align-items-center gap-3">
+                            <AppIcon name="search" :filled="isActive" />
+                            <span class="d-none d-xl-block">Buscar</span>
+                        </a>
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link to="/perfil" class="nav-link d-flex align-items-center gap-3 text-dark">
-                        <div v-if="authStore.user?.avatar" class="user-avatar-nav rounded-circle overflow-hidden">
-                            <img :src="authStore.user.avatar" class="w-100 h-100 object-fit-cover" alt="User Avatar">
-                        </div>
-                        <div v-else class="user-avatar-nav bg-secondary text-white rounded-circle">
-                            {{ authStore.user?.name?.charAt(0).toUpperCase() || 'U' }}
-                        </div>
-                        <span class="d-none d-xl-block">Perfil</span>
+                    <router-link :to="{ name: ROUTE_NAMES.CRIAR }" custom v-slot="{ href, navigate, isActive }">
+                        <a :href="href" @click="navigate" class="nav-link d-flex align-items-center gap-3">
+                            <AppIcon name="create" :filled="isActive" />
+                            <span class="d-none d-xl-block">Criar</span>
+                        </a>
+                    </router-link>
+                </li>
+                <li class="nav-item">
+                    <router-link :to="{ name: ROUTE_NAMES.PERFIL }" custom v-slot="{ href, navigate, isActive }">
+                        <a :href="href" @click="navigate" class="nav-link d-flex align-items-center gap-3">
+                            <AppIcon name="profile" :filled="isActive" />
+                            <span class="d-none d-xl-block">Perfil</span>
+                        </a>
                     </router-link>
                 </li>
             </ul>
 
             <div class="mt-auto d-none d-md-block">
                 <button @click="handleLogout"
-                    class="btn btn-link text-danger text-decoration-none d-flex align-items-center gap-3 p-2 w-100">
+                    class="btn btn-link logout-btn text-decoration-none d-flex align-items-center gap-3 p-2 w-100">
                     <i class="bi bi-box-arrow-left fs-4"></i>
                     <span class="d-none d-xl-block">Sair</span>
                 </button>
@@ -63,18 +74,31 @@ const handleLogout = () => {
     top: 0;
     bottom: 0;
     width: 240px;
-    /* Largura padrão Desktop */
+    background-color: var(--bg-main);
+    border-color: var(--border) !important;
     z-index: 1000;
     transition: width 0.3s ease;
 }
 
 .logo-font {
-    font-family: 'Style Script', cursive;
-    font-size: 1.8rem;
+    color: var(--text-primary);
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+
+.nav-link {
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    transition: opacity 0.2s ease;
 }
 
 .nav-link:hover {
-    background-color: #f8f9fa;
+    opacity: 0.7;
+    background-color: transparent;
+}
+
+.nav-link.router-link-active {
+    font-weight: 600;
 }
 
 .user-avatar-nav {
@@ -85,6 +109,15 @@ const handleLogout = () => {
     justify-content: center;
     font-size: 0.8rem;
     font-weight: bold;
+}
+
+.logout-btn {
+    color: var(--text-secondary) !important;
+}
+
+.logout-btn:hover {
+    color: var(--danger) !important;
+    opacity: 0.9;
 }
 
 /* Ajuste para telas médias (Tablets) - Ícones apenas */
@@ -100,8 +133,8 @@ const handleLogout = () => {
         top: auto;
         width: 100%;
         height: 60px;
-        border-bottom: none;
-        border-top: 1px solid #dee2e6;
+        border-bottom: none !important;
+        border-top: 1px solid var(--border) !important;
     }
 
     .nav-container .d-flex {

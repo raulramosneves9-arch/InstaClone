@@ -1,13 +1,13 @@
 <template>
-  <div class="d-flex mb-2 gap-3 summary-row">
-    <div><strong>{{ postsCount }}</strong> publicações</div>
-    <div>
-      <router-link :to="followersLink" class="text-decoration-none text-body summary-link">
-        <strong>{{ followersCount }}</strong> seguidores
+  <div class="d-flex mb-4 gap-3 summary-row">
+    <div class="summary-item"><strong>{{ postsCount }}</strong> {{ postsCount === 1 ? 'post' : 'posts' }}</div>
+    <div class="summary-item">
+      <router-link :to="followersLink" class="text-decoration-none summary-link">
+        <strong>{{ followersCount }}</strong> {{ followersCount === 1 ? 'seguidor' : 'seguidores' }}
       </router-link>
     </div>
-    <div>
-      <router-link :to="followingLink" class="text-decoration-none text-body summary-link">
+    <div class="summary-item">
+      <router-link :to="followingLink" class="text-decoration-none summary-link">
         <strong>{{ followingCount }}</strong> seguindo
       </router-link>
     </div>
@@ -42,9 +42,11 @@ defineProps({
 <style scoped>
 .summary-row {
   color: var(--text-primary);
+  font-size: 0.95rem;
 }
 
 .summary-link {
+  color: inherit;
   transition: opacity 0.2s ease;
 }
 

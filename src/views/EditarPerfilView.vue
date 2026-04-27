@@ -10,9 +10,9 @@
       <!-- Avatar Section -->
       <div class="mb-5 d-flex align-items-center gap-4">
         <div class="avatar-edit-wrapper">
-          <img :src="avatarPreview || authStore.user?.avatar || 'https://via.placeholder.com/150'" 
-               class="rounded-circle object-fit-cover border" 
-               width="44" height="44" alt="Avatar">
+          <Avatar :src="avatarPreview || resolveImageUrl(authStore.user?.avatar_url || authStore.user?.avatar, true)" 
+                  :size="44" 
+                  :alt="authStore.user?.username" />
         </div>
         <div class="avatar-actions">
           <div class="fw-semibold mb-1">{{ authStore.user?.username }}</div>
@@ -82,6 +82,8 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
+import Avatar from '../components/ui/Avatar.vue';
+import { resolveImageUrl } from '../utils/imageUrl';
 import { useImageUpload } from '../composables/useImageUpload';
 import {
   PROFILE_NAME_MAX_LENGTH,

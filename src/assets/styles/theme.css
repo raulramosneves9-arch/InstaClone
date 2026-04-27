@@ -210,6 +210,43 @@ hr {
     opacity: 0.45;
     cursor: not-allowed;
 }
+    
+.btn-ig-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    background: #363636;
+    border: none;
+    color: var(--text-primary);
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-ig-secondary:hover:not(:disabled) {
+    background-color: #262626;
+}
+
+.btn-ig-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.btn-ig-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
 
 .btn-ig-danger {
     display: inline-flex;

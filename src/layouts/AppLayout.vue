@@ -25,7 +25,7 @@ import Navbar from '../components/Navbar.vue';
 }
 
 .app-content-wrapper {
-    width: min(100%, 1100px);
+    width: min(100%, 1400px);
     margin: 0 auto;
     padding: 0 16px;
 }
@@ -33,14 +33,14 @@ import Navbar from '../components/Navbar.vue';
 @media (min-width: 768px) {
     .main-content {
         padding-bottom: 0;
-        margin-left: 244px;
+        margin-left: 72px;
     }
 }
 
 @media (min-width: 1200px) {
     .app-content-wrapper {
         display: grid;
-        grid-template-columns: minmax(470px, 600px) minmax(260px, 320px);
+        grid-template-columns: 1fr;
         column-gap: 32px;
         align-items: start;
         justify-content: center;

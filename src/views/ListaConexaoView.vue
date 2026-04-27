@@ -189,7 +189,6 @@ watch(() => route.query.user, () => {
 
 .connections-list {
   display: flex;
-  flex-column: column;
   flex-direction: column;
 }
 </style>

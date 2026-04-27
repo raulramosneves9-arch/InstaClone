@@ -1,7 +1,7 @@
 <template>
   <div class="container py-4" style="max-width: 600px; margin: 0 auto;">
     <div class="d-flex align-items-center mb-4">
-      <button class="btn btn-link text-body p-0 me-3" @click="goBack">
+      <button class="btn btn-link text-body p-0 me-3 nav-back-btn" @click="goBack">
         <i class="bi bi-arrow-left fs-4"></i>
       </button>
       <h3 class="mb-0">{{ title }}</h3>
@@ -22,27 +22,17 @@
         Nenhum usuário encontrado.
       </div>
       
-      <div class="list-group list-group-flush mb-4">
-        <div v-for="user in users" :key="user.id" class="list-group-item px-0 d-flex align-items-center border-0 mb-2">
-          <div class="cursor-pointer d-flex align-items-center flex-grow-1" @click="goToProfile(user.username)">
-            <img :src="user.avatar || 'https://ui-avatars.com/api/?name=' + user.name + '&background=random'" 
-                 class="rounded-circle me-3 object-fit-cover" 
-                 width="50" height="50" alt="Avatar">
-            <div>
-              <div class="fw-bold text-dark">{{ user.username }}</div>
-              <div class="text-muted small">{{ user.name }}</div>
-            </div>
-          </div>
-          
-          <div v-if="authStore.user?.id !== user.id">
-            <button 
-              class="btn btn-sm" 
-              :class="discoverStore.followingIds.has(user.id) ? 'btn-secondary' : 'btn-primary'"
-              @click="discoverStore.toggleFollow(user.id)"
-            >
-              {{ discoverStore.followingIds.has(user.id) ? 'Seguindo' : 'Seguir' }}
-            </button>
-          </div>
+      <div class="d-flex flex-column gap-3 mb-4">
+        <div v-for="user in users" :key="user.id">
+          <AccountCard
+            :user="user"
+            compact
+            :is-following="followsStore.followingIds.has(user.id)"
+            :is-pending="followsStore.pendingIds.has(user.id)"
+            :show-follow-button="authStore.user?.id !== user.id"
+            @click="goToProfile(user.username)"
+            @toggle-follow="followsStore.toggleFollow(user.id)"
+          />
         </div>
       </div>
       
@@ -70,13 +60,15 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { useDiscoverStore } from '../stores/discover';
+import { useFollowsStore } from '../stores/follows';
 import api from '../services/api';
+import { CONNECTION_LIST_TYPES, ROUTE_NAMES } from '../router/routeNames';
+import AccountCard from '../components/profile/AccountCard.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const discoverStore = useDiscoverStore();
+const followsStore = useFollowsStore();
 
 const users = ref([]);
 const loading = ref(true);
@@ -85,27 +77,38 @@ const error = ref(null);
 const currentPage = ref(1);
 const lastPage = ref(1);
 
-const type = computed(() => route.params.type); // 'seguidores' ou 'seguindo'
+const type = computed(() => route.params.type);
 const targetUsername = computed(() => route.query.user || authStore.user?.username);
 
 const title = computed(() => {
-  return type.value === 'seguidores' ? 'Seguidores' : 'Seguindo';
+  return type.value === CONNECTION_LIST_TYPES.FOLLOWERS ? 'Seguidores' : 'Seguindo';
+});
+
+const isValidType = computed(() => {
+  return Object.values(CONNECTION_LIST_TYPES).includes(type.value);
+});
+
+const normalizedType = computed(() => {
+  if (isValidType.value) return type.value;
+  if (type.value === 'seguidores') return CONNECTION_LIST_TYPES.FOLLOWERS;
+  if (type.value === 'seguindo') return CONNECTION_LIST_TYPES.FOLLOWING;
+  return null;
 });
 
 const goBack = () => {
   if (route.query.user) {
-    router.push(`/perfil?user=${route.query.user}`);
+    router.push(`/profile?user=${route.query.user}`);
   } else {
-    router.push('/perfil');
+    router.push('/profile');
   }
 };
 
 const goToProfile = (username) => {
-  router.push(`/perfil?user=${username}`);
+  router.push(`/profile?user=${username}`);
 };
 
 const fetchData = async (page = 1) => {
-  if (!targetUsername.value) return;
+  if (!targetUsername.value || !normalizedType.value) return;
   
   loading.value = true;
   error.value = null;
@@ -116,7 +119,7 @@ const fetchData = async (page = 1) => {
     const targetId = profileRes.data.id;
     
     // 2. Buscar a lista
-    const endpoint = type.value === 'seguidores' ? `/users/${targetId}/followers` : `/users/${targetId}/following`;
+    const endpoint = normalizedType.value === CONNECTION_LIST_TYPES.FOLLOWERS ? `/users/${targetId}/followers` : `/users/${targetId}/following`;
     const res = await api.get(`${endpoint}?page=${page}`);
     
     users.value = res.data.data || res.data;
@@ -124,8 +127,8 @@ const fetchData = async (page = 1) => {
     lastPage.value = res.data.last_page || 1;
     
     // Garantir que a lista de quem eu sigo está carregada para os botões funcionarem
-    if (authStore.user?.id && discoverStore.followingIds.size === 0) {
-      await discoverStore.fetchFollowing(authStore.user.id);
+    if (authStore.user?.id && followsStore.followingIds.size === 0) {
+      await followsStore.fetchFollowing(authStore.user.id);
     }
   } catch (err) {
     error.value = err.response?.data?.message || 'Erro ao carregar a lista.';
@@ -135,10 +138,34 @@ const fetchData = async (page = 1) => {
 };
 
 onMounted(() => {
+  if (!normalizedType.value) {
+    router.replace({ name: ROUTE_NAMES.NOT_FOUND });
+    return;
+  }
+  if (!isValidType.value && normalizedType.value) {
+    router.replace({
+      name: ROUTE_NAMES.PERFIL_LISTA,
+      params: { type: normalizedType.value },
+      query: route.query,
+    });
+    return;
+  }
   fetchData();
 });
 
 watch(() => route.params.type, () => {
+  if (!normalizedType.value) {
+    router.replace({ name: ROUTE_NAMES.NOT_FOUND });
+    return;
+  }
+  if (!isValidType.value && normalizedType.value) {
+    router.replace({
+      name: ROUTE_NAMES.PERFIL_LISTA,
+      params: { type: normalizedType.value },
+      query: route.query,
+    });
+    return;
+  }
   fetchData(1);
 });
 
@@ -150,5 +177,9 @@ watch(() => route.query.user, () => {
 <style scoped>
 .cursor-pointer {
   cursor: pointer;
+}
+
+.nav-back-btn:hover {
+  opacity: 0.7;
 }
 </style>

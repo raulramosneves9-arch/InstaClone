@@ -1,58 +1,18 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFeedStore } from '@/stores/feed';
+import { useImageUpload } from '@/composables/useImageUpload';
 import Spinner from '@/components/ui/Spinner.vue';
 
 const feedStore = useFeedStore();
 const router = useRouter();
 
 const caption = ref('');
-const imageFile = ref(null);
-const imagePreview = ref(null);
 const loading = ref(false);
 const errorMsg = ref('');
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-
-const clearImage = () => {
-    if (imagePreview.value) {
-        URL.revokeObjectURL(imagePreview.value);
-    }
-    imageFile.value = null;
-    imagePreview.value = null;
-    errorMsg.value = '';
-};
-
-onUnmounted(() => {
-    if (imagePreview.value) {
-        URL.revokeObjectURL(imagePreview.value);
-    }
-});
-
-const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    errorMsg.value = '';
-
-    if (file) {
-        if (file.size > MAX_FILE_SIZE) {
-            errorMsg.value = "A imagem deve ter no máximo 5 MB.";
-            // Limpa o input se necessário para permitir selecionar a mesma imagem se o erro for ignorado, mas como limpamos as refs está tudo bem.
-            return;
-        }
-
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        if (!validTypes.includes(file.type)) {
-            errorMsg.value = "Formato inválido. Use JPEG, PNG ou WEBP.";
-            return;
-        }
-
-        clearImage(); // Revogar a anterior se existir
-        
-        imageFile.value = file;
-        imagePreview.value = URL.createObjectURL(file);
-    }
-};
+const { imageFile, imagePreview, uploadError, handleFileChange, clearImage } = useImageUpload();
 
 const handleSubmit = async () => {
     if (!imageFile.value || !caption.value.trim()) {
@@ -87,7 +47,7 @@ const handleSubmit = async () => {
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white border-bottom py-3">
+                    <div class="card-header border-bottom py-3">
                         <h5 class="mb-0 text-center fw-bold">Criar nova publicação</h5>
                     </div>
 
@@ -103,7 +63,7 @@ const handleSubmit = async () => {
                         </div>
 
                         <div v-else class="mb-3">
-                            <img :src="imagePreview" class="img-fluid rounded border mb-3" style="max-height: 400px;">
+                            <img :src="imagePreview" class="img-fluid rounded border mb-3 preview-image" style="max-height: 400px;">
                             <button class="btn btn-outline-danger btn-sm d-block mx-auto"
                                 @click="clearImage">Trocar imagem</button>
                         </div>
@@ -115,7 +75,7 @@ const handleSubmit = async () => {
                                     {{ caption.length }} / 2200
                                 </small>
                             </div>
-                            <textarea v-model="caption" class="form-control bg-light border-0" rows="3"
+                            <textarea v-model="caption" class="form-control border-0" rows="3"
                                 placeholder="Escreva uma legenda..."></textarea>
                         </div>
 
@@ -125,7 +85,7 @@ const handleSubmit = async () => {
                             <span v-else>Compartilhar</span>
                         </button>
 
-                        <div v-if="errorMsg" class="text-danger small mt-2">{{ errorMsg }}</div>
+                        <div v-if="errorMsg || uploadError" class="text-danger small mt-2">{{ errorMsg || uploadError }}</div>
                     </div>
                 </div>
             </div>
@@ -137,5 +97,16 @@ const handleSubmit = async () => {
 .upload-placeholder {
     border-style: dashed !important;
     border-width: 2px !important;
+    background-color: var(--bg-secondary);
+    border-color: var(--border) !important;
+}
+
+.card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border) !important;
+}
+
+.preview-image {
+    border-color: var(--border) !important;
 }
 </style>

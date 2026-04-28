@@ -1,148 +1,208 @@
-# InstaClone (frontend) - Status real de implementacao
+# InstaClone (frontend) - Especificacao de build
 
-Checklist revisada com base no codigo atual do repositório.
+Lista de tarefas para reconstruir o frontend. Cada item descreve comportamento esperado, endpoints consumidos e restrições de UI. Os nomes de rota, endpoints, stores compartilhados e limites são contratos com o backend e devem ser respeitados.
 
 ## 1 - Setup do Projeto
 
-- [x] Inicializar projeto com vue@latest
-- [x] Estrutura de pastas por dominio: `components/`, `composables/`, `layouts/`, `router/`, `services/`, `stores/`, `utils/`, `views/`
-- [x] Vue Router com rota curinga `/:pathMatch(.*)*` servindo uma view `NotFound`
-- [x] Todas as views devem ser lazy-loaded com `component: () => import(...)`
-- [x] Constantes de nomes de rota e tipos de lista em `src/router/routeNames.js`
-- [x] Pinia para estado compartilhado (`auth`, `feed`, `follows`)
-- [x] Tema global em `src/assets/styles/theme.css` (importado no `main.js` apos Bootstrap)
-- [x] Google Fonts carregado por `<link rel="preconnect">` + stylesheet em `index.html`
-- [x] Cliente axios centralizado em `src/services/api.js`
-- [x] `.env.example` com `VITE_API_URL=http://localhost:8000/api`
-- [x] `.dockerignore` excluindo `node_modules`, `dist`, `.env`, mantendo `.env.example`
+- [ ] Inicializar projeto com vue@latest
+- [ ] Estrutura de pastas por dominio: `components/`, `composables/`, `layouts/`, `router/`, `services/`, `stores/`, `utils/`, `views/`
+- [ ] Vue Router com rota curinga `/:pathMatch(.*)*` servindo uma view `NotFound`
+- [ ] Todas as views devem ser lazy-loaded com `component: () => import(...)`
+- [ ] Constantes de nomes de rota e tipos de lista em `src/router/routeNames.js`
+- [ ] Pinia para estado compartilhado (`auth`, `feed`, `follows`)
+- [ ] Tema global em `src/assets/styles/theme.css` (importado no `main.js` apos Bootstrap)
+- [ ] Google Fonts carregado por `<link rel="preconnect">` + stylesheet em `index.html`
+- [ ] Cliente axios centralizado em `src/services/api.js`:
+  - baseURL lida de `import.meta.env.VITE_API_URL`
+  - interceptor de request injeta `Authorization: Bearer <token>` quando existe token
+  - interceptor de response trata `401`: limpa token, redireciona para `/login`
+- [ ] `.env.example` com `VITE_API_URL=http://localhost:8000/api`
+- [ ] `.dockerignore` excluindo `node_modules`, `dist`, `.env`, mantendo `.env.example`
 
-## 2 - Autenticacao
+## 2 - Autenticação
 
-- [x] Tela `/login` com campos `email` e `password`
-- [x] Tela de registro (implementada em `/cadastro`, nao `/register`)
-- [x] Store `auth` (Pinia) com estado `user`, `token`, `isAuthenticated`, actions `login`, `register`, `logout`, `fetchMe`
-- [x] `POST /auth/login` devolve `access_token` e `user`; token salvo em `localStorage` (`instaclone.token`)
-- [x] `POST /auth/register` cria conta e autentica
-- [x] `POST /auth/logout` limpa sessão local mesmo com token inválido (logout atual apenas local)
-- [x] `GET /auth/me` hidrata o usuario atual
-- [x] Servico de autenticacão via cliente central usado pela UI
-- [x] Guards de rota `requiresAuth` / `requiresGuest`
-- [x] Mensagens de erro exibidas inline abaixo do formulario
-- [x] Código browser-only sem guards desnecessários de SSR
+- [ ] Tela `/login` com campos `email` e `password`
+- [ ] Tela `/register` com campos `name`, `username`, `email`, `password`, `password_confirmation`
+- [ ] Store `auth` (Pinia) com estado `user`, `token`, `isAuthenticated`, actions `login`, `register`, `logout`, `fetchMe`/`hydrateAuthState`
+- [ ] `POST /auth/login` devolve `access_token` e `user`; salvar token em `localStorage` com chave fixa (ex.: `instaclone.token`)
+- [ ] `POST /auth/register` cria conta e já autentica
+- [ ] `POST /auth/logout` limpa sessão local mesmo se o token já estiver inválido
+- [ ] `GET /auth/me` hidrata o usuario atual a partir do token salvo ao entrar em rota protegida
+- [ ] Servico de autenticacão deve expor apenas endpoints usados pela UI
+- [ ] Guards de rota:
+  - `requiresAuth`: sem token, redireciona para `/login`
+  - `requiresGuest`: com token, redireciona para `/feed`
+- [ ] Mensagens de erro exibidas inline abaixo do formulario
+- [ ] Código browser-only pode acessar APIs do browser sem guards de SSR desnecessarios
 
 ## 3 - Layout, Navegacao e Icones
 
-- [x] `AuthLayout` para telas de visitante
-- [x] `AppLayout` para area autenticada
-- [x] Layout autenticado concentrado em `src/layouts/AppLayout.vue`
-- [x] Shell autenticado responsivo (sidebar desktop e barra inferior mobile)
-- [x] Entradas de navegacao: `Home`, `Buscar`, `Criar`, `Perfil` (falta item de Buscar na navbar atual)
-- [x] Navegacao por constantes `ROUTE_NAMES`
-- [x] `RouterView` usando `v-slot="{ Component }"` + `<component :is="Component" />`
-- [x] `AppIcon` com prop `filled`
+- [ ] `AuthLayout` para telas de visitante (`/login`, `/register`)
+- [ ] `AppLayout` para area autenticada
+- [ ] Layout autenticado concentrado em `src/layouts/AppLayout.vue`
+- [ ] Shell autenticado responsivo:
+  - mobile: barra de navegacao inferior fixa
+  - desktop: sidebar lateral
+- [ ] Entradas de navegacao: `Home` (`/feed`), `Buscar` (`/discover`), `Criar` (`/create`), `Perfil` (`/profile`)
+- [ ] Todas as navegacoes por nome devem usar `ROUTE_NAMES`, nao strings literais em `name: '...'`
+- [ ] `RouterView` usando `v-slot="{ Component }"` + `<component :is="Component" />` para troca de views
+- [ ] `AppIcon` deve aceitar prop `filled` para desenhar corretamente icones preenchidos, incluindo coracao curtido
 
 ## 4 - Feed (`/feed`)
 
-- [x] `GET /feed` com paginação por cursor
-- [x] Store `feed` normaliza posts em dicionario (`postsById`) + ordem (`feedOrder`)
-- [x] Actions: `fetchFeed`, `loadMoreFeed`, `toggleLike`, `addComment`, `createPost`
-- [x] `normalizeComment` em `stores/feed.js`
-- [x] `defaultAuthor()` em `stores/profileUtils.js`
-- [x] Botao "carregar mais" quando existe `nextCursor`
-- [x] Card com data relativa
-- [x] Card com autor, imagem, curtidas, legenda, comentários e campo inline
-- [x] Comentar inline com payload `{ body }` (atual envia `content`)
-- [x] Descurtir via `DELETE /posts/:id/unlike` no feed (atual usa somente `POST /posts/:id/like`)
+- [ ] `GET /feed` retorna `{ items: [...], next_cursor: string|null }`
+- [ ] Store `feed` normaliza os posts em um dicionario por id e mantem uma lista ordenada
+- [ ] Actions do store: `fetchFeed`, `loadMoreFeed(cursor)`, `toggleLike(postId)`, `addComment(postId, body)`, `createPost(formData)`
+- [ ] `normalizeComment` deve viver em `stores/feed.js`
+- [ ] `defaultAuthor()` deve viver em `stores/profileUtils.js` para evitar duplicar o autor fallback em post/comentario
+- [ ] Botao "carregar mais" visivel enquanto `next_cursor !== null`
+- [ ] Card de post exibe:
+  - avatar + username do autor (link para `/profile?user=<username>`)
+  - imagem do post
+  - contador de curtidas e botao de like
+  - legenda
+  - data relativa (ex.: "ha 2h")
+  - contador de comentarios
+  - campo inline para adicionar comentario
+- [ ] Curtir: `POST /posts/:id/like`. Descurtir: `DELETE /posts/:id/unlike`. Atualizar contador de forma otimista
+- [ ] Comentar inline: `POST /posts/:id/comments` com `{ body }`
 
 ## 5 - Descobrir (`/discover`)
 
-- [x] Rota esperada `/discover` (atual: `/descobrir`)
-- [x] `GET /users/suggestions` lista perfis sugeridos
-- [x] `GET /users/:viewerId/following` para estado inicial de botao
-- [x] Estado de follow vindo de store `follows` (atual está em `discoverStore`)
-- [x] Store `follows` com `followingIds` e `pendingIds` reativos
-- [x] Seguir/deixar de seguir por card
-- [x] Cards devem usar `components/profile/AccountCard.vue`
-- [x] Clique no card abre perfil
-- [x] Paginação por pagina (`?page=<n>`)
+- [ ] `GET /users/suggestions` lista perfis sugeridos
+- [ ] `GET /users/:viewerId/following` carrega quem o viewer ja segue para marcar o estado do botao
+- [ ] Estado de follow deve vir do store `follows`, nao de Sets locais na view
+- [ ] Store `follows` deve manter `followingIds` e `pendingIds` como `Set`, sempre trocando por um novo `Set` a cada mutacao para preservar reatividade
+- [ ] Botao "Seguir" / "Seguindo" por card:
+  - seguir: `POST /users/:id/follow`
+  - deixar de seguir: `DELETE /users/:id/unfollow`
+- [ ] Cards de usuarios devem usar `components/profile/AccountCard.vue`
+- [ ] Clique no card abre `/profile?user=<username>` ou `/profile` se for o proprio
+- [ ] Paginacao por pagina (`?page=<n>`)
 
 ## 6 - Criar Post (`/create`)
 
-- [x] Rota esperada `/create` (atual: `/criar`)
-- [x] Input file aceita `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
-- [x] Limite de 5 MB no cliente
-- [x] Preview com `URL.createObjectURL` + cleanup
-- [x] Logica de upload em `composables/useImageUpload.js`
-- [x] Campo de legenda com limite de 2200 e contador
-- [x] Botao desabilitado sem imagem/legenda
-- [x] `POST /posts` com `FormData`
-- [x] Feedback de sucesso (redireciona para `/feed`) e erro
+- [ ] Input `<input type="file">` aceita apenas `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
+- [ ] Limite de 5 MB (validar no cliente antes do upload)
+- [ ] Preview local com `URL.createObjectURL`; revogar o blob ao trocar imagem, limpar ou desmontar
+- [ ] Logica de file picker, preview blob e cleanup deve vir de `composables/useImageUpload.js`
+- [ ] Campo de legenda com limite de `2200` caracteres e contador visivel
+- [ ] Botao de publicar desabilitado enquanto imagem ou legenda estao ausentes
+- [ ] `POST /posts` com `FormData` contendo `image` e `caption`
+- [ ] Exibir feedback de sucesso (redirecionar para `/feed`) e mensagens de erro
 
 ## 7 - Perfil (`/profile` e `/profile?user=<username>`)
 
-- [x] Rotas esperadas `/profile` (atual: `/perfil`)
-- [x] `GET /users/{username}` resolve perfil alvo
-- [x] Carrega posts/followers/following
-- [x] `GET /users/{id}/is-following` para perfil de terceiros
-- [x] Ações de follow via store `follows` (atual direto na view/API)
-- [x] Seguir/deixar de seguir no perfil
-- [x] Rota esperada `/profile/edit` (atual: `/perfil/editar`)
-- [x] Rotas esperadas `/profile/list/followers|following` (atual: `/perfil/lista/seguidores|seguindo`)
-- [x] Grid de posts abre `/posts/:postId`
-- [x] `ProfileView` decomposto em `ProfileHeader`, `ProfileSummaryCards` e `ProfilePostGrid`
+- [ ] `GET /users/{username}` resolve o perfil alvo
+- [ ] Em paralelo, carregar:
+  - `GET /users/{id}/posts` (grid de posts)
+  - `GET /users/{id}/followers` (contador)
+  - `GET /users/{id}/following` (contador)
+- [ ] Para perfis de terceiros, consultar `GET /users/{id}/is-following` para decidir o estado inicial do botao
+- [ ] Acoes de seguir/deixar de seguir devem usar o store `follows`
+- [ ] Acoes:
+  - seguir: `POST /users/:id/follow`
+  - deixar de seguir: `DELETE /users/:id/unfollow`
+- [ ] Botao "Editar perfil" aparece apenas no proprio perfil e leva a `/profile/edit`
+- [ ] Contadores de seguidores e seguindo levam a `/profile/list/followers` e `/profile/list/following` (preservando o `?user=` quando for perfil de terceiros)
+- [ ] Grid de posts: clicar em um post abre `/posts/:postId`
+- [ ] `ProfileView` deve delegar UI para `ProfileHeader`, `ProfileSummaryCards` e `ProfilePostGrid`
 
 ## 7.1 - Editar Perfil (`/profile/edit`)
 
-- [x] `PUT /users/me` com `{ name, username, bio }`
-- [x] `POST /users/me/avatar` com `FormData`
-- [x] Limites: `name` 255, `username` 30 + regex, `bio` 500, avatar 2MB
-- [x] Constantes `PROFILE_*_MAX_LENGTH` em `stores/profileUtils.js`
-- [x] Logica de upload em `composables/useImageUpload.js`
-- [x] Mensagens de erro por campo do backend
+- [ ] `PUT /users/me` com `{ name, username, bio }`
+- [ ] `POST /users/me/avatar` com `FormData` contendo `avatar`
+- [ ] Limites validados no cliente:
+  - `name`: 255 caracteres
+  - `username`: 30 caracteres, regex `^[A-Za-z0-9._]+$`
+  - `bio`: 500 caracteres
+  - avatar: 2 MB
+- [ ] Constantes `PROFILE_*_MAX_LENGTH` devem viver em `stores/profileUtils.js`
+- [ ] Logica de upload/preview/cleanup do avatar deve usar `composables/useImageUpload.js`
+- [ ] Mensagens de erro por campo vindas do backend
 
 ## 8 - Listas de Conexao (`/profile/list/:type`)
 
-- [x] `:type` deveria aceitar `followers` e `following` (atual: `seguidores` e `seguindo`)
-- [x] Tipos válidos via `CONNECTION_LIST_TYPES`
-- [x] Respeita `?user=<username>`
-- [x] Usa `GET /users/{id}/followers` e `GET /users/{id}/following` com paginação
-- [x] Linhas mostram avatar, nome, username e botão de seguir/deixar de seguir
-- [x] Conta renderizada por `components/profile/AccountCard.vue`
-- [x] Estado de follow/pending via store `follows`
-- [x] Botao de voltar para perfil de origem
+- [ ] `:type` aceita `followers` ou `following`
+- [ ] Tipos validos devem vir de `CONNECTION_LIST_TYPES`
+- [ ] Respeita `?user=<username>` para listar conexoes de outro perfil
+- [ ] `GET /users/{id}/followers` e `GET /users/{id}/following` com paginacao por pagina
+- [ ] Cada linha mostra avatar, nome, username e botao de seguir / deixar de seguir
+- [ ] Cada conta deve ser renderizada por `components/profile/AccountCard.vue`
+- [ ] Estado de follow/pending deve vir do store `follows`
+- [ ] Botao de voltar para o perfil de origem
 
 ## 9 - Detalhes do Post (`/posts/:postId`)
 
-- [x] `GET /posts/:id` carrega post
-- [x] `GET /posts/:id/comments` com paginação
-- [x] Componentes dedicados de comentário (`PostCommentList`, `PostCommentItem`, `PostCommentForm`)
-- [x] Botao "carregar mais" comentarios
-- [x] Campo de comentar com payload `{ body }` (atual envia `content`)
-- [x] `DELETE /comments/:id` apenas para autor
-- [x] `DELETE /posts/:id` apenas para autor, redireciona `/feed`
-- [x] Contadores de curtidas/comentarios do backend
+- [ ] `GET /posts/:id` carrega o post
+- [ ] `GET /posts/:id/comments` carrega comentarios com paginacao por pagina
+- [ ] Comentarios devem usar componentes dedicados:
+  - `PostCommentList`
+  - `PostCommentItem`
+  - `PostCommentForm`
+- [ ] Botao "carregar mais" para comentarios
+- [ ] Campo para adicionar comentario: `POST /posts/:id/comments`
+- [ ] `DELETE /comments/:id` disponivel apenas para o autor do comentario
+- [ ] `DELETE /posts/:id` disponivel apenas para o autor do post; redireciona para `/feed` apos sucesso
+- [ ] Contadores de curtidas e comentarios vem do payload do backend
 
 ## 10 - Datas e Performance
 
-- [x] Formatadores em `utils/dates.js` (arquivo atual é `utils/date.js`)
-- [x] `Intl.DateTimeFormat` hoistado para formatadores definidos em task
-- [x] Build de produção mantém views em chunks separados (lazy routes)
-- [x] Build de produção gera chunks em `dist/assets`
+- [ ] Formatadores de data devem viver em `utils/dates.js`
+- [ ] Instancias de `Intl.DateTimeFormat` devem ser hoistadas para escopo de modulo:
+  - `formatDayMonthYear`
+  - `formatRelative`
+  - `formatFullDateTime`
+  - `formatShortDateTime`
+- [ ] Build de producao deve manter views em chunks separados por causa das rotas lazy-loaded
+- [ ] Build de producao deve gerar chunks JavaScript separados em `dist/assets` por causa das rotas lazy-loaded
 
 ## 11 - 404
 
-- [x] View `NotFound` com link para `/feed` (autenticado) ou `/login` (visitante)
+- [ ] View `NotFound` com link para `/feed` (autenticado) ou `/login` (visitante)
 
 ## 12 - Docker e Entrega
 
-- [x] `Dockerfile` multi-stage com `node:22-alpine` + `nginx:1.27-alpine`
-- [x] `docker/nginx.conf` com `try_files $uri $uri/ /index.html`
-- [x] `compose.yaml` expondo `3000:80` e passando `VITE_API_URL` como build-arg
-- [x] `.dockerignore` exclui `node_modules`, `dist`, `.env` e preserva `.env.example`
-- [x] `npm run build` gera bundle em `dist/`
+- [ ] `Dockerfile` multi-stage:
+  - stage `build`: `node:22-alpine`, roda `npm ci` e `npm run build`
+  - stage runtime: `nginx:1.27-alpine` servindo `/usr/share/nginx/html`
+- [ ] `docker/nginx.conf` com `try_files $uri $uri/ /index.html` para o history mode do Vue Router
+- [ ] `compose.yaml` expondo `3000:80` e passando `VITE_API_URL` como build-arg
+- [ ] `.dockerignore` excluindo `node_modules`, `dist`, `.env`, preservando `.env.example`
+- [ ] `npm run build` gera bundle de producao em `dist/`
 
 ## Fora de escopo deliberado
+
+Estes itens nao fazem parte desta etapa porque mudam o formato do projeto ou exigem uma auditoria propria:
 
 - TypeScript
 - Otimizacao fina de importacao do Bootstrap
 - Modal customizado para confirmacoes destrutivas
+
+## Endpoints consumidos (resumo)
+
+| Recurso | Metodo | Rota |
+| --- | --- | --- |
+| Auth | POST | `/auth/login` |
+| Auth | POST | `/auth/register` |
+| Auth | POST | `/auth/logout` |
+| Auth | GET | `/auth/me` |
+| Feed | GET | `/feed?cursor=<c>` |
+| Posts | POST | `/posts` (multipart) |
+| Posts | GET | `/posts/:id` |
+| Posts | DELETE | `/posts/:id` |
+| Posts | POST | `/posts/:id/like` |
+| Posts | DELETE | `/posts/:id/unlike` |
+| Comments | GET | `/posts/:id/comments` |
+| Comments | POST | `/posts/:id/comments` |
+| Comments | DELETE | `/comments/:id` |
+| Users | GET | `/users/suggestions` |
+| Users | GET | `/users/:username` |
+| Users | GET | `/users/:id/posts` |
+| Users | GET | `/users/:id/followers` |
+| Users | GET | `/users/:id/following` |
+| Users | GET | `/users/:id/is-following` |
+| Users | POST | `/users/:id/follow` |
+| Users | DELETE | `/users/:id/unfollow` |
+| Users | PUT | `/users/me` |
+| Users | POST | `/users/me/avatar` (multipart) |

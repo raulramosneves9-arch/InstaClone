@@ -19,7 +19,7 @@ export const useDiscoverStore = defineStore('discover', {
                 const { data } = await api.get(`/users/suggestions?page=${page}`);
                 const users = data.data || data;
                 this.suggestions = users;
-                
+
                 this.currentPage = data.current_page || page;
                 this.lastPage = data.last_page || 1;
             } catch (error) {

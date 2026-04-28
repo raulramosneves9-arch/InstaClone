@@ -1,3 +1,4 @@
+// Nomes das rotas da aplicação, usados para navegação consistente
 export const ROUTE_NAMES = Object.freeze({
     LOGIN: 'login',
     CADASTRO: 'cadastro',

@@ -2,23 +2,36 @@ import { defineStore } from 'pinia';
 import api from '../services/api';
 import { defaultAuthor } from './profileUtils';
 
+const DEFAULT_USERNAME = 'user';
+
+/**
+ * Normalizes user data from API responses.
+ */
+const normalizeUser = (user = {}) => ({
+    id: user.id ?? null,
+    username: user.username ?? DEFAULT_USERNAME,
+    avatarUrl: user.avatar_url ?? user.avatarUrl ?? null,
+});
+
+/**
+ * Normalizes comment data from API responses.
+ */
 const normalizeComment = (comment = {}) => ({
     id: comment.id ?? crypto.randomUUID(),
     content: comment.content ?? comment.body ?? '',
-    user: {
-        id: comment.user?.id ?? comment.author?.id ?? null,
-        username: comment.user?.username ?? comment.author?.username ?? 'usuario',
-        avatar_url: comment.user?.avatar_url ?? comment.author?.avatar_url ?? null,
-    },
-    created_at: comment.created_at ?? comment.createdAt ?? null,
+    user: normalizeUser(comment.user ?? comment.author),
+    createdAt: comment.created_at ?? comment.createdAt ?? null,
 });
 
+/**
+ * Normalizes post data from API responses.
+ */
 const normalizePost = (post = {}) => ({
     ...post,
     user: post.user ?? defaultAuthor(),
     isLiked: Boolean(post.isLiked ?? post.is_liked),
-    likes_count: Number(post.likes_count ?? post.likesCount ?? 0),
-    comments_count: Number(post.comments_count ?? post.commentsCount ?? post.comments?.length ?? 0),
+    likesCount: Number(post.likes_count ?? post.likesCount ?? 0),
+    commentsCount: Number(post.comments_count ?? post.commentsCount ?? post.comments?.length ?? 0),
     comments: Array.isArray(post.comments) ? post.comments.map(normalizeComment) : [],
 });
 
@@ -32,25 +45,37 @@ export const useFeedStore = defineStore('feed', {
     }),
 
     getters: {
+        /**
+         * Returns the feed posts in display order.
+         */
         feedPosts: (state) => state.feedOrder.map(id => state.postsById[id]),
     },
 
     actions: {
-        // Busca os posts reais do seu banco
+        // Método privado para adicionar posts à store sem duplicação
+        _addPostsToStore(posts) {
+            posts.forEach(post => {
+                if (!this.postsById[post.id]) {
+                    this.postsById[post.id] = post;
+                    this.feedOrder.push(post.id);
+                }
+            });
+        },
+
+        // Busca o feed inicial do backend
         async fetchFeed() {
             this.isLoading = true;
             try {
                 const { data } = await api.get('/feed');
                 const posts = (data.data || data).map(normalizePost);
 
-                posts.forEach(post => {
-                    this.postsById[post.id] = post;
-                });
-
-                this.feedOrder = posts.map(post => post.id);
+                this.postsById = {};
+                this.feedOrder = [];
+                this._addPostsToStore(posts);
                 this.nextCursor = data.next_cursor || null;
             } catch (error) {
                 console.error("Erro ao carregar feed:", error);
+                throw new Error('Falha ao carregar feed');
             } finally {
                 this.isLoading = false;
             }
@@ -63,22 +88,17 @@ export const useFeedStore = defineStore('feed', {
                 const { data } = await api.get(`/feed?cursor=${this.nextCursor}`);
                 const posts = (data.data || data).map(normalizePost);
 
-                posts.forEach(post => {
-                    this.postsById[post.id] = post;
-                    if (!this.feedOrder.includes(post.id)) {
-                        this.feedOrder.push(post.id);
-                    }
-                });
-
+                this._addPostsToStore(posts);
                 this.nextCursor = data.next_cursor || null;
             } catch (error) {
                 console.error("Erro ao carregar mais feed:", error);
+                throw new Error('Falha ao carregar mais feed');
             } finally {
                 this.isFetchingMore = false;
             }
         },
 
-        // Envia o post (Meme + Legenda) para o Laravel
+        // Cria um novo post e adiciona no topo do feed
         async createPost(formData) {
             try {
                 const { data } = await api.post('/posts', formData, {
@@ -87,15 +107,15 @@ export const useFeedStore = defineStore('feed', {
                     }
                 });
 
-                const postData = normalizePost(data.data || data);
+                const newPost = normalizePost(data.data || data);
 
-                // Adiciona o post retornado pelo back no topo do feed
-                this.postsById[postData.id] = postData;
-                this.feedOrder.unshift(postData.id);
+                // Adiciona o novo post no topo do feed
+                this.postsById[newPost.id] = newPost;
+                this.feedOrder.unshift(newPost.id);
 
-                return postData;
+                return newPost;
             } catch (error) {
-                console.error("Erro no upload:", error);
+                console.error("Erro ao criar post:", error);
                 throw error.response?.data?.message || 'Erro ao publicar post';
             }
         },
@@ -104,20 +124,20 @@ export const useFeedStore = defineStore('feed', {
             const post = this.postsById[postId];
             if (!post) return;
 
-            // Otimismo no Front (muda antes da resposta do back)
-            post.isLiked = !post.isLiked;
-            post.likes_count += post.isLiked ? 1 : -1;
+            // Atualização otimista
+            const wasLiked = post.isLiked;
+            post.isLiked = !wasLiked;
+            post.likesCount += post.isLiked ? 1 : -1;
 
             try {
-                if (post.isLiked) {
-                    await api.post(`/posts/${postId}/like`);
-                } else {
-                    await api.delete(`/posts/${postId}/unlike`);
-                }
+                const endpoint = post.isLiked ? 'like' : 'unlike';
+                await api.post(`/posts/${postId}/${endpoint}`);
             } catch (error) {
-                // Reverte se o back falhar
-                post.isLiked = !post.isLiked;
-                post.likes_count += post.isLiked ? 1 : -1;
+                console.error('Falha ao alternar like:', error);
+                // Reverte em caso de falha
+                post.isLiked = wasLiked;
+                post.likesCount += wasLiked ? 1 : -1;
+                throw new Error('Falha ao atualizar like');
             }
         },
 
@@ -132,9 +152,10 @@ export const useFeedStore = defineStore('feed', {
                 }
 
                 post.comments.push(comment);
-                post.comments_count = Number(post.comments_count ?? 0) + 1;
+                post.commentsCount = Number(post.commentsCount ?? 0) + 1;
                 return comment;
             } catch (error) {
+                console.error('Erro ao adicionar comentário:', error);
                 throw error.response?.data?.message || 'Erro ao comentar';
             }
         }

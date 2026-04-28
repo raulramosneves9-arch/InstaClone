@@ -19,7 +19,6 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        // Busca os dados do usuário logado
         async fetchMe() {
             try {
                 const response = await api.get('/auth/me');
@@ -29,7 +28,6 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        // Realiza o Login
         async login(email, password) {
             try {
                 const response = await api.post('/auth/login', { email, password });
@@ -38,13 +36,11 @@ export const useAuthStore = defineStore('auth', {
 
                 localStorage.setItem('instaclone.token', this.token);
             } catch (error) {
-                // Lança o erro para ser capturado pela View (LoginView)
                 const message = error.response?.data?.message || 'Erro ao entrar';
                 throw message;
             }
         },
 
-        // Realiza o Registro (Cadastro)
         async register(formData) {
             try {
                 const response = await api.post('/auth/register', formData);
@@ -53,17 +49,14 @@ export const useAuthStore = defineStore('auth', {
 
                 localStorage.setItem('instaclone.token', this.token);
             } catch (error) {
-                // Retorna os erros de validação do Laravel (e-mail já existe, etc)
                 throw error.response?.data?.errors || 'Erro ao cadastrar';
             }
         },
 
-        // Logout: tenta invalidar token na API e sempre limpa sessão local
         async logout() {
             try {
                 await api.post('/auth/logout');
             } catch (error) {
-                // Em token expirado/inválido, ainda precisamos encerrar a sessão local.
             }
 
             this.user = null;

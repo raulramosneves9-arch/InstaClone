@@ -33,7 +33,6 @@ const layout = computed(() => {
 </template>
 
 <style>
-/* Seus estilos de transição */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -44,7 +43,6 @@ const layout = computed(() => {
   opacity: 0;
 }
 
-/* Estilos globais para resetar o body se necessário */
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;

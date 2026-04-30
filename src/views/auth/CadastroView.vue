@@ -12,7 +12,7 @@ const form = ref({
     username: '',
     email: '',
     password: '',
-    password_confirmation: '' // Padrão do Laravel: password_confirmation
+    password_confirmation: '' 
 });
 
 const errors = ref({}); // Objeto para erros de validação
